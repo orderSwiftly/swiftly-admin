@@ -28,6 +28,7 @@ export default function SignupComp() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ fullname, email, password }),
       });
 
