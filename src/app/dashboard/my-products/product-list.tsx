@@ -80,7 +80,7 @@ export default function ProductList() {
         setProducts((prev) =>
           prev.map((p) =>
             p._id === productId
-              ? { ...p, productStatus: action === 'approve' ? 'approved' : 'declined' }
+              ? { ...p, productStatus: action === 'approve' ? 'approve' : 'declined' }
               : p
           )
         );
@@ -157,7 +157,7 @@ export default function ProductList() {
                   </span>
                   <span
                     className={`px-2 py-1 rounded-md text-white capitalize ${
-                      product.productStatus === 'approved'
+                      product.productStatus === 'approve'
                       ? 'bg-yellow-500'
                       : product.productStatus === 'declined'
                       ? 'bg-red-500'
