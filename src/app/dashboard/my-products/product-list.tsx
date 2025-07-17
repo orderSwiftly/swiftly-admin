@@ -54,7 +54,7 @@ export default function ProductList() {
 
   const updateProductStatus = async (
     productId: string,
-    action: 'approve' | 'reject'
+    action: 'approve' | 'decline'
   ) => {
     const product = products.find((p) => p._id === productId);
     if (!product || product.productStatus !== 'pending') {
@@ -80,7 +80,7 @@ export default function ProductList() {
         setProducts((prev) =>
           prev.map((p) =>
             p._id === productId
-              ? { ...p, productStatus: action === 'approve' ? 'approved' : 'rejected' }
+              ? { ...p, productStatus: action === 'approve' ? 'approved' : 'declined' }
               : p
           )
         );
@@ -159,7 +159,7 @@ export default function ProductList() {
                     className={`px-2 py-1 rounded-md text-white capitalize ${
                       product.productStatus === 'approved'
                       ? 'bg-yellow-500'
-                      : product.productStatus === 'rejected'
+                      : product.productStatus === 'declined'
                       ? 'bg-red-500'
                       : 'bg-green-500'
                     }`}
@@ -191,7 +191,7 @@ export default function ProductList() {
                   </button>
                   <button
                     className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-md text-sm font-semibold transition duration-300"
-                    onClick={() => updateProductStatus(product._id, 'reject')}
+                    onClick={() => updateProductStatus(product._id, 'decline')}
                   >
                     Decline
                   </button>
