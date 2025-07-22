@@ -184,7 +184,7 @@ export default function ProductList() {
                 </div>
 
                 <Link
-                  href={`/dashboard/my-products/${product._id}`}
+                  href={`/dashboard/all-products/${product._id}`}
                   className="group flex items-center gap-2 text-[var(--acc-clr)] font-medium hover:underline mb-4"
                 >
                   <span>View Details</span>
