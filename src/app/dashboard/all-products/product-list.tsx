@@ -16,6 +16,7 @@ type Product = {
   stock: number;
   location: string;
   productStatus: string;
+  averageRating?: number;
 };
 
 export default function ProductList() {
@@ -34,7 +35,7 @@ export default function ProductList() {
       const data = await res.json();
 
       if (res.ok && data.status === 'success') {
-        setProducts(data.data.products ?? []);
+        setProducts(data.data.enrichedProducts ?? []);
       } else {
         setError(data.message ?? 'Failed to fetch products');
         toast.error(data.message ?? 'Failed to fetch products');
@@ -140,6 +141,13 @@ export default function ProductList() {
                 <h4 className="text-lg font-semibold text-[var(--txt-clr)] mb-1 pry-ff">
                   {product.title}
                 </h4>
+                {typeof product.averageRating === 'number' && (
+                    <div className="text-yellow-500 text-sm mt-1 flex items-center gap-1">
+                      <span className="font-medium">{product.averageRating.toFixed(1)}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">/5</span>
+                    </div>
+                )}
+                
                 <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 sec-ff mb-2">
                   {product.description}
                 </p>
@@ -149,19 +157,26 @@ export default function ProductList() {
                 </p>
 
                 <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
-                  <span className="bg-gray-100 dark:bg-white/10 px-2 py-1 rounded-md">
-                    Stock: {product.stock}
+                  <span
+                    className={`px-2 py-1 rounded-md ${
+                      product.stock === 0
+                      ? 'bg-red-600 text-white'
+                      : 'bg-gray-100 dark:bg-white/10 text-black dark:text-white'
+                    }`}
+                  >
+                    {product.stock === 0 ? 'Sold Out' : `Stock: ${product.stock}`}
                   </span>
+
                   <span className="bg-gray-100 dark:bg-white/10 px-2 py-1 rounded-md">
                     {product.location}
                   </span>
                   <span
                     className={`px-2 py-1 rounded-md text-white capitalize ${
                       product.productStatus === 'approve'
-                      ? 'bg-yellow-500'
+                      ? 'bg-green-500'
                       : product.productStatus === 'declined'
-                      ? 'bg-red-500'
-                      : 'bg-green-500'
+                      ? 'bg-yellow-500'
+                      : 'bg-red-500'
                     }`}
                   >
                     {product.productStatus}

@@ -17,10 +17,10 @@ import { useState } from 'react';
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'My Products', href: '/dashboard/my-products', icon: Package },
-  { label: 'My Orders', href: '/dashboard/my-orders', icon: ShoppingBag },
+  { label: 'All Products', href: '/dashboard/all-products', icon: Package },
+  { label: 'All Orders', href: '/dashboard/all-orders', icon: ShoppingBag },
   { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
-  { label: 'Wallet', href: '/dashboard/wallet', icon: Wallet2 },
+  { label: 'Transactions', href: '/dashboard/transactions', icon: Wallet2 },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
