@@ -23,11 +23,15 @@ const NotificationsList = () => {
 
   const fetchNotifications = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('You must be logged in to access this page');
+      }
       const api_url = process.env.NEXT_PUBLIC_API_URL;
       const res = await fetch(`${api_url}/api/v1/notification/super-admin/get-notifications`, {
         method: 'GET',
-        credentials: 'include',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -46,11 +50,15 @@ const NotificationsList = () => {
   const markAsRead = async (id: string) => {
     try {
       const api_url = process.env.NEXT_PUBLIC_API_URL;
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('You must be logged in to access this page');
+      }
       const res = await fetch(`${api_url}/api/v1/notification/super-admin/notifications/${id}/read`, {
         method: 'PATCH',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
       });
 

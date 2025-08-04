@@ -25,11 +25,17 @@ export default function ProductList() {
   const [error, setError] = useState('');
 
   const fetchProducts = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('You must be logged in to access this page');
+    }
     const api_url = process.env.NEXT_PUBLIC_API_URL;
     try {
       const res = await fetch(`${api_url}/api/v1/product/my-products`, {
         method: 'GET',
-        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
@@ -64,11 +70,17 @@ export default function ProductList() {
     }
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('You must be logged in to access this action');
+      }
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/super-admin/product/${productId}/moderate?action=${action}`,
         {
           method: 'PATCH',
-          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
         }
       );
 

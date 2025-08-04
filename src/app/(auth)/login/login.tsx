@@ -20,16 +20,11 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('You must be logged in to access this page');
-      }
       const api_url = process.env.NEXT_PUBLIC_API_URL;
       const res = await fetch(`${api_url}/api/v1/auth/super-admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ email, password }),
       });
@@ -38,6 +33,7 @@ export default function Login() {
 
       if (!res.ok) throw new Error(data?.message ?? 'Login failed');
 
+      localStorage.setItem('token', data.data.superAdmin.token);
       toast.success('Login successful!');
       router.push('/dashboard');
     } catch (err: unknown) {

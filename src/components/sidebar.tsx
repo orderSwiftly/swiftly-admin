@@ -17,8 +17,8 @@ import { useState } from 'react';
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'All Products', href: '/dashboard/all-products', icon: Package },
-  { label: 'All Orders', href: '/dashboard/all-orders', icon: ShoppingBag },
+  { label: 'Products', href: '/dashboard/all-products', icon: Package },
+  { label: 'Orders', href: '/dashboard/all-orders', icon: ShoppingBag },
   { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
   { label: 'Transactions', href: '/dashboard/transactions', icon: Wallet2 },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },

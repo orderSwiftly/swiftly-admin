@@ -38,11 +38,17 @@ export default function ProductDetails() {
 
     const fetchProduct = async () => {
       try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('You must be logged in to access this page');
+        }
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/product/get-product/${id}`,
           {
             method: 'GET',
-            credentials: 'include',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            }
           }
         );
 
