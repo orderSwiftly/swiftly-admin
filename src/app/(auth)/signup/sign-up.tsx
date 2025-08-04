@@ -16,19 +16,23 @@ export default function SignupComp() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // const api_url = process.env.NEXT_PUBLIC_API_URL;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await fetch('/api/v1/auth/super-admin/signup', {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('You must be logged in to access this page');
+      }
+      const api_url = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${api_url}/api/v1/auth/super-admin/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        credentials: 'include',
         body: JSON.stringify({ fullname, email, password }),
       });
 
