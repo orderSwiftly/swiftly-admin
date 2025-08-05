@@ -76,7 +76,7 @@ export default function TransactionsTable() {
                 <th className="py-3 px-4 text-left whitespace-nowrap">Email</th>
                 <th className="py-3 px-4 text-left whitespace-nowrap">Amount</th>
                 <th className="py-3 px-4 text-left whitespace-nowrap">Status</th>
-                <th className="py-3 px-4 text-left whitespace-nowrap">Response</th>
+                <th className="py-3 px-14 text-left whitespace-nowrap">Response</th>
                 <th className="py-3 px-4 text-left whitespace-nowrap">Channel</th>
                 <th className="py-3 px-4 text-left whitespace-nowrap">Currency</th>
                 <th className="py-3 px-8 text-left whitespace-nowrap">IP Address</th>
@@ -134,7 +134,7 @@ export default function TransactionsTable() {
       {/* Mobile Cards */}
       <div className="lg:hidden space-y-4">
         {transactions.map((tx) => (
-          <div key={tx.id} className="bg-white/10 backdrop-blur-md border border-[var(--acc-clr)] rounded-lg p-4">
+          <div key={tx.id} className="bg-white/10 backdrop-blur-md border border-[var(--acc-clr)] rounded-lg p-4 sec-ff">
             <div className="flex justify-between items-start mb-3">
               <div className="flex-1">
                 <p className="font-mono text-xs text-[var(--acc-clr)] mb-1">
