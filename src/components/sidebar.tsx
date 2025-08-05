@@ -32,47 +32,67 @@ export default function Sidebar() {
     <>
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden md:flex flex-col ${
+        className={`hidden md:block fixed top-0 left-0 h-screen z-40 ${
           open ? 'w-64' : 'w-20'
-        } transition-all duration-300 bg-[var(--bg-clr)] text-[var(--txt-clr)] shadow-md sec-ff p-4`}
+        } transition-all duration-300 bg-[var(--bg-clr)] text-[var(--txt-clr)] shadow-md sec-ff`}
       >
-        {/* Toggle Button */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="self-end mb-4 text-white/70 hover:text-white"
-        >
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
-
-        <div className="mb-6 text-xl font-bold">
-          <Link href='/'>
-            <Image
-              src="/tredia-logo.png"
-              alt="Tredia Logo"
-              width={40}
-              height={40}
-              className="w-auto object-cover"
-            />
-          </Link>
-        </div>
-
-        <nav className="space-y-4">
-          {navItems.map(({ label, href, icon: Icon }) => {
-            const isActive = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 hover:bg-white/10 ${
-                  isActive ? 'bg-white/10 font-semibold' : ''
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                {open && <span>{label}</span>}
+        <div className="flex flex-col h-full p-4">
+          {/* Header with Toggle and Logo */}
+          <div className="flex items-center justify-between mb-6">
+            <div className={`${open ? 'block' : 'hidden'}`}>
+              <Link href='/'>
+                <Image
+                  src="/tredia-logo.png"
+                  alt="Tredia Logo"
+                  width={40}
+                  height={40}
+                  className="w-auto object-cover"
+                />
               </Link>
-            );
-          })}
-        </nav>
+            </div>
+            <button
+              onClick={() => setOpen(!open)}
+              className="text-white/70 hover:text-white transition-colors"
+            >
+              {open ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+
+          {/* Logo when collapsed */}
+          {!open && (
+            <div className="mb-6 flex justify-center">
+              <Link href='/'>
+                <Image
+                  src="/tredia-logo.png"
+                  alt="Tredia Logo"
+                  width={32}
+                  height={32}
+                  className="w-auto object-cover"
+                />
+              </Link>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <nav className="flex-1 space-y-2">
+            {navItems.map(({ label, href, icon: Icon }) => {
+              const isActive = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`flex items-center gap-3 px-3 py-3 rounded-md transition-all duration-200 hover:bg-white/10 ${
+                    isActive ? 'bg-white/10 font-semibold' : ''
+                  } ${!open ? 'justify-center' : ''}`}
+                  title={!open ? label : undefined}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {open && <span className="truncate">{label}</span>}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
       </aside>
 
       {/* Bottom Nav for Mobile */}

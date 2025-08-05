@@ -3,15 +3,21 @@ import GetTransactions from "./get-transactions";
 
 export default function TransactionPage() {
   return (
-    <main className="min-h-screen bg-[var(--light-bg)] px-4 py-10 flex flex-col items-start gap-8">
-      {/* Balance should appear at the top */}
-      <GetBalance />
+    <main className="min-h-screen bg-[var(--light-bg)] pt-4 md:pt-6 md:pl-72 lg:pl-20 xl:pl-72 px-4 md:px-6 pb-20 md:pb-6 overflow-x-hidden">
+      <div className="max-w-5xl space-y-6">
+        {/* Balance Component */}
+        <GetBalance />
 
-      <h1 className="text-4xl font-bold pry-ff text-[var(--acc-clr)]">Transactions</h1>
+        {/* Page Title */}
+        <div className="mb-6">
+          <h1 className="text-3xl md:text-4xl font-bold pry-ff text-[var(--acc-clr)]">
+            Transactions
+          </h1>
+        </div>
 
-      <GetTransactions />
-
-      {/* Additional transaction content can go here later */}
+        {/* Transactions Table */}
+        <GetTransactions />
+      </div>
     </main>
   );
 }

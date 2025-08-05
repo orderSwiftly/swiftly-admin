@@ -11,9 +11,11 @@ const GetNotification = dynamic(() => import('./get-notification'), {
 
 export default function NotificationPage() {
   return (
-    <main className="flex min-h-screen items-center justify-start bg-[var(--light-bg)] flex-col gap-5 p-4">
-      <h1 className="text-4xl font-bold mb-4 pry-ff text-[var(--acc-clr)]">Notifications</h1>
-      <GetNotification />
+    <main className="min-h-screen w-full bg-[var(--light-bg)] pt-[70px] md:pl-72 flex justify-between px-2 space-y-6 ">
+      <div className="w-full max-w-4xl">
+        <h1 className="text-2xl font-bold mb-4 text-[var(--acc-clr)] pry-ff">Notifications</h1>
+        <GetNotification />
+      </div>
     </main>
   );
 }
