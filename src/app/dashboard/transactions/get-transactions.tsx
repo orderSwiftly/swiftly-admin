@@ -24,7 +24,7 @@ export default function TransactionsTable() {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-        try {
+      try {
         const token = localStorage.getItem('token');
         if (!token) {
           throw new Error('You must be logged in to access this page');
@@ -36,7 +36,7 @@ export default function TransactionsTable() {
           },
         });
         const data = await res.json();
-        setTransactions(data.data); // Assuming backend returns { data: [...] }
+        setTransactions(data.data);
       } catch (err) {
         console.error('Failed to fetch transactions', err);
       } finally {
@@ -50,38 +50,38 @@ export default function TransactionsTable() {
   if (loading) return <p>Loading transactions...</p>;
 
   return (
-    <div className="overflow-x-hidden w-full">
-      <table className="min-w-full bg-white/10 backdrop-blur-md border border-[var(--acc-clr)] rounded-md">
-        <thead className="bg-white/10 backdrop-blur-md text-left text-sm font-semibold">
-          <tr className="sec-ff text-[var(--acc-clr)]">
-            <th className="py-2 px-4">Reference</th>
-            <th className="py-2 px-4">Email</th>
-            <th className="py-2 px-4">Amount (₦)</th>
-            <th className="py-2 px-4">Status</th>
-            <th className="py-2 px-4">Response</th>
-            <th className="py-2 px-4">Channel</th>
-            <th className="py-2 px-4">Currency</th>
-            <th className="py-2 px-4">IP Address</th>
-            <th className="py-2 px-4">Paid At</th>
-            <th className="py-2 px-4">Created At</th>
+    <div className="w-full overflow-x-auto">
+      <table className="min-w-[900px] w-full text-sm md:text-base bg-white/10 backdrop-blur-md border border-[var(--acc-clr)] rounded-md">
+        <thead className="bg-white/10 text-left font-semibold text-[var(--acc-clr)]">
+          <tr className="sec-ff">
+            <th className="py-2 px-4 whitespace-nowrap">Reference</th>
+            <th className="py-2 px-4 whitespace-nowrap">Email</th>
+            <th className="py-2 px-4 whitespace-nowrap">Amount (₦)</th>
+            <th className="py-2 px-4 whitespace-nowrap">Status</th>
+            <th className="py-2 px-4 whitespace-nowrap">Response</th>
+            <th className="py-2 px-4 whitespace-nowrap">Channel</th>
+            <th className="py-2 px-4 whitespace-nowrap">Currency</th>
+            <th className="py-2 px-4 whitespace-nowrap">IP Address</th>
+            <th className="py-2 px-4 whitespace-nowrap">Paid At</th>
+            <th className="py-2 px-4 whitespace-nowrap">Created At</th>
           </tr>
         </thead>
-        <tbody className="text-sm">
+        <tbody className="text-sm text-[var(--txt-clr)] sec-ff">
           {transactions.map((tx) => (
-            <tr key={tx.id} className="border-t border-[var(--acc-clr)] hover:bg-white/5 transition-colors text-[var(--txt-clr)] sec-ff">
-              <td className="py-2 px-4">{tx.reference}</td>
-              <td className="py-2 px-4">{tx.customer?.email || 'N/A'}</td>
+            <tr key={tx.id} className="border-t border-[var(--acc-clr)] hover:bg-white/5 transition-colors">
+              <td className="py-2 px-4 break-all">{tx.reference}</td>
+              <td className="py-2 px-4 break-all">{tx.customer?.email || 'N/A'}</td>
               <td className="py-2 px-4">
                 {(tx.amount / 100).toLocaleString('en-NG', {
                   style: 'currency',
                   currency: 'NGN',
                 })}
               </td>
-              <td className="py-2 px-4">{tx.status}</td>
+              <td className="py-2 px-4 capitalize">{tx.status}</td>
               <td className="py-2 px-4">{tx.gateway_response}</td>
-              <td className="py-2 px-4">{tx.channel}</td>
+              <td className="py-2 px-4 capitalize">{tx.channel}</td>
               <td className="py-2 px-4">{tx.currency}</td>
-              <td className="py-2 px-4">{tx.ip_address}</td>
+              <td className="py-2 px-4 break-all">{tx.ip_address}</td>
               <td className="py-2 px-4">{tx.paid_at ? new Date(tx.paid_at).toLocaleString() : '—'}</td>
               <td className="py-2 px-4">{new Date(tx.created_at).toLocaleString()}</td>
             </tr>
