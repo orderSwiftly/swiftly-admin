@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import PulseLoader from "@/components/pulse-loader";
+import { useRouter } from "next/navigation";
 
 interface User {
   _id: string;
@@ -11,8 +12,8 @@ interface User {
   phoneNumber?: string;
   photo?: string;
   isVerifiedStudent: boolean;
-  paystackSubaccountId?: string;   // ✅ string, optional
-  hasSubaccount?: boolean; // ✅ boolean, comes from backend
+  paystackSubaccountId?: string;
+  hasSubaccount?: boolean;
   role: string;
   createdAt: string;
 }
@@ -21,6 +22,7 @@ export default function GetUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const fetchUsers = async () => {
     try {
@@ -32,9 +34,7 @@ export default function GetUsers() {
       }
 
       const res = await axios.get(`${apiUrl}/api/v1/user/get-users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       setUsers(res.data.data.users);
@@ -64,14 +64,18 @@ export default function GetUsers() {
             <th className="py-2 px-4 border-b">Email</th>
             <th className="py-2 px-4 border-b">Phone</th>
             <th className="py-2 px-4 border-b">Verified</th>
-            <th className="py-2 px-4 border-b">Subaccount</th> {/* ✅ New column */}
+            <th className="py-2 px-4 border-b">Subaccount</th>
             <th className="py-2 px-4 border-b">Role</th>
             <th className="py-2 px-4 border-b">Created At</th>
           </tr>
         </thead>
         <tbody>
           {users.map((user, index) => (
-            <tr key={user._id} className="border-t hover:bg-[var(--bg-clr)] cursor-pointer transition duration-200">
+            <tr
+              key={user._id}
+              onClick={() => router.push(`/dashboard/all-users/${user._id}`)}
+              className="border-t hover:bg-[var(--bg-clr)] cursor-pointer transition duration-200"
+            >
               <td className="py-2 px-4 text-[var(--acc-clr)] pry-ff">{index + 1}</td>
               <td className="py-2 px-4">
                 {user.photo ? (
