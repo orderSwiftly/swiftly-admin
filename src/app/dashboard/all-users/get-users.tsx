@@ -4,17 +4,19 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import PulseLoader from "@/components/pulse-loader";
 
-
 interface User {
-    _id: string;
-    fullname: string;
-    email: string;
-    phoneNumber?: string;
-    photo?: string;
-    isVerifiedStudent: boolean;
-    role: string;
-    createdAt: string;
+  _id: string;
+  fullname: string;
+  email: string;
+  phoneNumber?: string;
+  photo?: string;
+  isVerifiedStudent: boolean;
+  paystackSubaccountId?: string;   // ✅ string, optional
+  hasSubaccount?: boolean; // ✅ boolean, comes from backend
+  role: string;
+  createdAt: string;
 }
+
 export default function GetUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,8 +40,8 @@ export default function GetUsers() {
       setUsers(res.data.data.users);
       setLoading(false);
     } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-        setLoading(false);
+      setError(err instanceof Error ? err.message : "An error occurred");
+      setLoading(false);
     }
   };
 
@@ -47,7 +49,7 @@ export default function GetUsers() {
     fetchUsers();
   }, []);
 
-    if (loading) return <div className="flex items-center justify-center"><PulseLoader /></div>;
+  if (loading) return <div className="flex items-center justify-center"><PulseLoader /></div>;
   if (error) return <p className="p-4 text-red-500">Error: {error}</p>;
 
   return (
@@ -62,6 +64,7 @@ export default function GetUsers() {
             <th className="py-2 px-4 border-b">Email</th>
             <th className="py-2 px-4 border-b">Phone</th>
             <th className="py-2 px-4 border-b">Verified</th>
+            <th className="py-2 px-4 border-b">Subaccount</th> {/* ✅ New column */}
             <th className="py-2 px-4 border-b">Role</th>
             <th className="py-2 px-4 border-b">Created At</th>
           </tr>
@@ -88,6 +91,9 @@ export default function GetUsers() {
               <td className="py-2 px-4 text-[var(--txt-clr)] sec-ff">{user.phoneNumber || "N/A"}</td>
               <td className="py-2 px-4 text-[var(--txt-clr)] sec-ff">
                 {user.isVerifiedStudent ? "Yes" : "No"}
+              </td>
+              <td className="py-2 px-4 text-[var(--txt-clr)] sec-ff">
+                {user.hasSubaccount || user.paystackSubaccountId ? "Yes" : "No"}
               </td>
               <td className="py-2 px-4 capitalize text-[var(--txt-clr)] sec-ff">{user.role}</td>
               <td className="py-2 px-4 text-[var(--txt-clr)] sec-ff">
