@@ -3,6 +3,7 @@
 import { useState } from "react";
 import GetNotifs from "@/components/get-notification";
 import Transaction from "@/components/transaction";
+import Settings from "@/components/settings/settings";
 
 const tabs = [
   { label: "Notifications", value: "notifications" },
@@ -61,8 +62,7 @@ export default function ActivitiesPage() {
         )}
         {activeTab === "settings" && (
           <div>
-            <h2 className="text-xl font-semibold text-[var(--acc-clr)]">Settings</h2>
-            <p className="text-sm text-[var(--txt-clr)]">Manage your settings here.</p>
+            <Settings />
           </div>
         )}
         {activeTab === "reports" && (
