@@ -5,7 +5,7 @@ import PulseLoader from '@/components/pulse-loader';
 
 type Notification = {
   _id: string;
-  superadminId: string;
+  adminId: string;
   message: string;
   resourceType: string;
   relatedResourceId: string;
