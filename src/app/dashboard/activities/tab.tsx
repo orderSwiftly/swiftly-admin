@@ -4,6 +4,7 @@ import { useState } from "react";
 import GetNotifs from "@/components/get-notification";
 import Transaction from "@/components/transaction";
 import Settings from "@/components/settings/settings";
+import Complaint from "@/components/get-complaint";
 
 const tabs = [
   { label: "Notifications", value: "notifications" },
@@ -56,8 +57,7 @@ export default function ActivitiesPage() {
         )}
         {activeTab === "complaints" && (
           <div>
-            <h2 className="text-xl font-semibold text-[var(--acc-clr)]">Complaints</h2>
-            <p className="text-sm text-[var(--txt-clr)]">Manage your complaints here.</p>
+            <Complaint />
           </div>
         )}
         {activeTab === "settings" && (
