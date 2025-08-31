@@ -4,8 +4,6 @@ import {
   LayoutDashboard,
   Package,
   Users,
-  Bell,
-  Wallet2,
   Clock,
   ChevronLeft,
   ChevronRight,
@@ -18,8 +16,6 @@ const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Products', href: '/dashboard/all-products', icon: Package },
   { label: 'Users', href: '/dashboard/all-users', icon: Users },
-  { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
-  { label: 'Transactions', href: '/dashboard/transactions', icon: Wallet2 },
   { label: 'Activities', href: '/dashboard/activities', icon: Clock },
 ];
 

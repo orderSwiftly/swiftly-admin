@@ -1,57 +1,55 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-type Transaction = {
-  id: number;
-  reference: string;
-  amount: number;
-  status: string;
-  gateway_response: string;
-  paid_at: string;
-  created_at: string;
-  channel: string;
-  currency: string;
-  ip_address: string;
-  customer: {
-    email: string;
-  };
-};
+import { getTransactions, type Transaction } from '@/lib/api/get-transactions';
 
 export default function TransactionsTable() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('You must be logged in to access this page');
-        }
-        const api_url = process.env.NEXT_PUBLIC_API_URL;
-        const res = await fetch(`${api_url}/api/v1/paystack/transactions`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await res.json();
-        setTransactions(data.data);
-      } catch (err) {
-        console.error('Failed to fetch transactions', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTransactions();
   }, []);
+
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getTransactions();
+      setTransactions(data);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch transactions';
+      setError(errorMessage);
+      console.error('Error fetching transactions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRetry = () => {
+    fetchTransactions();
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--acc-clr)]"></div>
         <p className="ml-3 text-[var(--txt-clr)]">Loading transactions...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500 mb-4">{error}</p>
+        <button
+          onClick={handleRetry}
+          className="px-4 py-2 bg-[var(--acc-clr)] text-white rounded-md hover:opacity-90 transition-opacity"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
