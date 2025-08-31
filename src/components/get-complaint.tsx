@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getComplaints } from "@/lib/api/get-complaint";
+import PulseLoader from "./pulse-loader";
 
 interface Complaint {
   _id: string;
@@ -34,7 +35,7 @@ export default function ComplaintsList() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
-        <p className="text-gray-400 animate-pulse">Loading complaints...</p>
+        <PulseLoader />
       </div>
     );
   }
