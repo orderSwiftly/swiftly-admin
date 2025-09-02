@@ -7,13 +7,15 @@ const DashboardContent = ({ children }: { children: React.ReactNode }) => {
   const { collapsed } = useSidebar();
   
   return (
-    <main 
-      className={`flex-1 bg-[var(--light-bg)] p-4 transition-all duration-300 min-h-screen ${
-        collapsed ? 'ml-16' : 'ml-64'
-      }`}
-    >
-      {children}
-    </main>
+    <div className="min-h-screen bg-[var(--light-bg)]">
+      <main
+        className={`flex-1 p-4 transition-all duration-300 ${
+          collapsed ? 'md:ml-16' : 'md:ml-64'
+        } pt-20 md:pt-4`}
+      >
+        {children}
+      </main>
+    </div>
   );
 };
 
@@ -24,7 +26,7 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="flex">
+      <div className="flex bg-[var(--light-bg)]">
         <Sidebar />
         <DashboardContent>{children}</DashboardContent>
       </div>

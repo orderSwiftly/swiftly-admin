@@ -11,6 +11,13 @@
   --sec-ff: "Manrope", sans-serif;
 }
 
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 60px; /* Space for bottom nav */
+  }
+}
+
 .bg-clr {
   color: var(--bg-clr);
   border: 1px solid var(--bg-clr);

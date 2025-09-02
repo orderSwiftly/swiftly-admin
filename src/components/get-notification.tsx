@@ -8,6 +8,19 @@ const NotificationsList = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   useEffect(() => {
     fetchNotifications();
@@ -40,8 +53,7 @@ const NotificationsList = () => {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to mark notification as read';
       console.error('Error marking notification as read:', error);
-      // You could show a toast notification here
-      alert(errorMessage); // Replace with proper toast/notification system
+      alert(errorMessage);
     }
   };
 
@@ -62,7 +74,7 @@ const NotificationsList = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center mt-5">
+      <div className="flex justify-center items-center py-10">
         <PulseLoader />
       </div>
     );
@@ -70,7 +82,7 @@ const NotificationsList = () => {
 
   if (error) {
     return (
-      <div className="text-center mt-5">
+      <div className="text-center py-10">
         <p className="text-red-500 pry-ff mb-4">{error}</p>
         <button
           onClick={fetchNotifications}
@@ -84,44 +96,51 @@ const NotificationsList = () => {
 
   if (notifications.length === 0) {
     return (
-      <p className="text-center text-[var(--txt-clr)] pry-ff">No notifications found.</p>
+      <div className="p-6 text-center bg-white/10 backdrop-blur-md rounded-lg">
+        <p className="text-[var(--txt-clr)] pry-ff">No notifications found.</p>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 md:space-y-4">
       {notifications.map((notif) => (
         <div
           key={notif._id}
-          className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 py-4 rounded-xl border-l-4 shadow-md backdrop-blur-md transition duration-200 hover:scale-[1.01] ${
+          className={`flex flex-col p-3 md:p-4 rounded-lg border-l-4 shadow-md backdrop-blur-md transition duration-200 ${
             notif.isRead
               ? 'bg-[var(--light-bg)]/70 border-transparent'
               : 'bg-[var(--light-bg)]/80 border-[var(--acc-clr)]'
-          }`}
+          } ${isMobile ? 'gap-3' : 'gap-4'}`}
         >
-          {/* Left Side */}
-          <div className="flex items-start sm:items-center gap-3 w-full sm:w-auto">
-            <input type="checkbox" className="accent-[var(--acc-clr)] mt-1 sm:mt-0" />
+          {/* Top Section - Content */}
+          <div className="flex items-start gap-3 w-full">
+            <input 
+              type="checkbox" 
+              className="accent-[var(--acc-clr)] mt-1" 
+              checked={notif.isRead}
+              onChange={() => !notif.isRead && handleMarkAsRead(notif._id)}
+            />
 
             <img
               src="/default-avatar.jpg"
               alt="User Avatar"
-              className="w-10 h-10 rounded-full object-cover"
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover flex-shrink-0"
             />
 
-            <div className="flex flex-col sec-ff">
-              <p className="text-sm leading-snug text-[var(--txt-clr)]">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm md:text-base leading-snug text-[var(--txt-clr)] break-words">
                 <span className="font-semibold text-[var(--acc-clr)]">You</span>{' '}
                 {notif.message.replace(/Jonathon Smith/i, '')}
               </p>
-              <p className="text-xs text-[var(--sec-clr)] sec-ff">{getTimeAgo(notif.createdAt)}</p>
+              <p className="text-xs text-[var(--sec-clr)] mt-1 sec-ff">{getTimeAgo(notif.createdAt)}</p>
             </div>
           </div>
 
-          {/* Right Side */}
-          <div className="flex items-center gap-4 justify-end sm:justify-start sec-ff">
+          {/* Bottom Section - Actions */}
+          <div className="flex items-center justify-between sec-ff">
             <span
-              className={`text-sm font-medium ${
+              className={`text-xs md:text-sm font-medium ${
                 notif.isRead ? 'text-[var(--sec-clr)]' : 'text-[var(--acc-clr)]'
               }`}
             >
@@ -131,7 +150,7 @@ const NotificationsList = () => {
             {!notif.isRead && (
               <button
                 onClick={() => handleMarkAsRead(notif._id)}
-                className="px-4 py-1.5 text-sm rounded-md font-medium whitespace-nowrap bg-[#1E2C3B] hover:bg-[#243545] transition-colors"
+                className="px-3 py-1.5 text-xs md:text-sm rounded font-medium bg-[#1E2C3B] hover:bg-[#243545] transition-colors"
                 style={{
                   color: 'var(--txt-clr)',
                 }}
