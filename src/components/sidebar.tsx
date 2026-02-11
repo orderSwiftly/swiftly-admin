@@ -63,15 +63,14 @@ const Sidebar = () => {
     <>
       <div className="hidden md:flex w-64 bg-gray-50 flex-col h-screen fixed left-0 top-0 z-50 border-r border-gray-200 pry-ff">
         <div className="p-6">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center">
             <Image
               src="/brand-logo.png"
               alt="Swiftly Logo"
-              width={48}
-              height={48}
+              width={100}
+              height={100}
               className="object-contain"
             />
-            <span className="text-xl font-bold text-gray-900 underline underline-offset-2 underline-green-600">swiftly</span>
           </div>
         </div>
 
@@ -89,7 +88,7 @@ const Sidebar = () => {
                 }`}
               >
                 <Icon size={20} className="flex-shrink-0" />
-                <span className="leading-tight">{label}</span>
+                <span className="leading-tight text-xs font-medium">{label}</span>
               </Link>
             );
           })}
