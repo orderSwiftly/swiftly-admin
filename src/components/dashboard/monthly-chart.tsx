@@ -24,13 +24,13 @@ interface MonthlyChartProps {
 
 export function MonthlyChart({ data, paymentMethods }: MonthlyChartProps) {
   return (
-    <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
-      <div className="flex items-start justify-between mb-8">
+    <div className="bg-white rounded-xl p-4 sm:p-6 md:p-8 shadow-sm border border-gray-200">
+      <div className="flex items-start justify-between mb-4 md:mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1">
             Swiftly Metrics
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500">
             Your current sales summary and activity.
           </p>
         </div>
@@ -43,7 +43,7 @@ export function MonthlyChart({ data, paymentMethods }: MonthlyChartProps) {
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-12 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 md:gap-12 mb-4 md:mb-8">
         <PaymentMethodCard
           method="Transfer"
           percentage={paymentMethods.transfer}
@@ -61,7 +61,11 @@ export function MonthlyChart({ data, paymentMethods }: MonthlyChartProps) {
         />
       </div>
 
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer
+        width="100%"
+        height={300}
+        className="sm:h-[350px] md:h-[400px]"
+      >
         <BarChart
           data={data}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
