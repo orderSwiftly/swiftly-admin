@@ -88,7 +88,9 @@ const Sidebar = () => {
                 }`}
               >
                 <Icon size={20} className="flex-shrink-0" />
-                <span className="leading-tight text-xs font-medium">{label}</span>
+                <span className="leading-tight text-xs font-medium">
+                  {label}
+                </span>
               </Link>
             );
           })}
@@ -100,8 +102,8 @@ const Sidebar = () => {
             className="absolute bottom-0 left-0 w-full h-full"
             preserveAspectRatio="none"
           >
-            <path d="M0 130 L0 80 L160 0 L240 60 L240 130 Z" fill="#e5e7eb" />
-            <path d="M160 0 L240 60 L240 130 L180 130 Z" fill="#6EE7B7" />
+            <path d="M0 130 L0 5000 L160 0 L440 70 L240 530 Z" fill="#D9D9D9" />
+            <path d="M160 0 L240 60 L240 130 L180 130 Z" fill="#669917" />
           </svg>
         </div>
 
