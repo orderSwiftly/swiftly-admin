@@ -119,6 +119,7 @@ export default function AllUsersPage() {
   });
 
   const totalPages = 10;
+  
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
