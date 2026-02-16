@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import PulseLoader from '@/components/pulse-loader';
 import { getNotifications, markNotificationAsRead, type Notification } from '@/lib/api/get-notif';
+import Image from 'next/image';
 
 const NotificationsList = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -122,9 +123,11 @@ const NotificationsList = () => {
               onChange={() => !notif.isRead && handleMarkAsRead(notif._id)}
             />
 
-            <img
+            <Image
               src="/default-avatar.jpg"
               alt="User Avatar"
+              width={12}
+              height={12}
               className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover flex-shrink-0"
             />
 

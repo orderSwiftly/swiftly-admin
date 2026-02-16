@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import PulseLoader from "@/components/pulse-loader";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface User {
   _id: string;
@@ -80,9 +81,11 @@ export default function GetUsers() {
             >
               <div className="flex items-center gap-3 mb-3">
                 {user.photo ? (
-                  <img
+                  <Image
                     src={user.photo}
                     alt="User"
+                    width={48}
+                    height={48}
                     className="w-12 h-12 rounded-full object-cover"
                   />
                 ) : (
@@ -152,9 +155,11 @@ export default function GetUsers() {
                   <td className="py-3 px-4 text-[var(--acc-clr)] pry-ff">{index + 1}</td>
                   <td className="py-3 px-4">
                     {user.photo ? (
-                      <img
+                      <Image
                         src={user.photo}
                         alt="User"
+                        width={40}
+                        height={40}
                         className="w-10 h-10 rounded-full object-cover"
                       />
                     ) : (

@@ -13,7 +13,7 @@ export function PaymentMethodCard({
 }: PaymentMethodCardProps) {
   const isPositive = change >= 0;
   const changeColor = isPositive ? "text-green-500" : "text-red-500";
-  const formattedChange = isPositive ? `+${change}%` : `${change}%`;
+  // const formattedChange = isPositive ? `+${change}%` : `${change}%`;
 
   return (
     <div className="flex flex-col">

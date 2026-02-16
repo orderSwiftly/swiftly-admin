@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MetricCard } from "@/components/dashboard/metric-card";
-import { PaymentMethodCard } from "@/components/dashboard/payment-method-card";
+// import { PaymentMethodCard } from "@/components/dashboard/payment-method-card";
 import { MonthlyChart } from "@/components/dashboard/monthly-chart";
 import {
   getDashboardMetrics,

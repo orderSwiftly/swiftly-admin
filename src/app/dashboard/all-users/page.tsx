@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Search, ChevronDown, Plus } from "lucide-react";
 import { User, AddUserData, EditUserData } from "@/types/user";
 import { AddUserModal } from "@/components/user-management/add-user-modal";
@@ -102,7 +102,7 @@ const mockUsers: User[] = [
 ];
 
 export default function AllUsersPage() {
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users] = useState<User[]>(mockUsers);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("All Roles");
   const [currentPage, setCurrentPage] = useState(1);
