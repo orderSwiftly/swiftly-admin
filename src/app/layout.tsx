@@ -5,10 +5,10 @@ import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   title: {
-    default: "Admin Dashboard - Trust-first gamified marketplace",
-    template: "%s | Admin Dashboard - Trust-first gamified marketplace",
+    default: "Admin Dashboard",
+    template: "%s | Admin Dashboard",
   },
-  description: "Trust-first commerce for university trade and beyond",
+  description: "Admin Dashboard for Swiftly",
 };
 
 export default function RootLayout({
@@ -29,8 +29,9 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Manrope&display=swap"
           rel="stylesheet"
         />
+          <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital@0;1&display=swap" rel="stylesheet" />
       </head>
-      <body>
+      <body className="pry-ff">
         {children}
         <Toaster position="top-center" />
       </body>
