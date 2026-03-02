@@ -22,8 +22,8 @@ export function FraudulentActionModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-      <div className="bg-white rounded-2xl max-w-lg w-full p-8">
-        <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
+      <div className="bg-white rounded-2xl max-w-lg w-full p-4 sm:p-6 md:p-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6">
           Fraudulent Action
         </h2>
 
@@ -40,7 +40,7 @@ export function FraudulentActionModal({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1.5">
                 Name
@@ -65,7 +65,7 @@ export function FraudulentActionModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1.5">
                 Phone number
@@ -90,7 +90,7 @@ export function FraudulentActionModal({
                 type="text"
                 value={log.university || "Babcock"}
                 readOnly
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-800 bg-white outline-none"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-gray-800 bg-white outline-none"
               />
             </div>
           </div>

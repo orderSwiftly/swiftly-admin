@@ -42,7 +42,7 @@ export function EditUserModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 md:p-8">
           <h2 className="text-3xl md:text-5xl font-semibold text-center text-[#101828] mb-8">
             Edit user
           </h2>
@@ -73,7 +73,7 @@ export function EditUserModal({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Name
@@ -104,7 +104,7 @@ export function EditUserModal({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Phone number
