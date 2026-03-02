@@ -284,7 +284,7 @@ export default function AllUsersPage() {
                     </td>
                     <td className="py-4 px-4">
                       <span
-                        className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                        className={`inline-flex px-4 py-2 rounded-[6px] text-xs font-medium ${getStatusBadgeClass(
                           user.status,
                         )}`}
                       >

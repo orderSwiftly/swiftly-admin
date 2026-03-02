@@ -11,7 +11,9 @@ export default function DashboardLayout({
     <body>
       <div className="flex bg-gray-50 min-h-screen">
         <Sidebar />
-        <main className="flex-1 md:ml-64">{children}</main>
+        <main className="flex-1 md:ml-64 min-w-0 overflow-x-hidden">
+          {children}
+        </main>
       </div>
     </body>
   );
