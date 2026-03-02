@@ -133,9 +133,13 @@ export default function DeliveryPartnersPage() {
   const [showMetrics, setShowMetrics] = useState(false);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showDisableModal, setShowDisableModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [riderToDelete, setRiderToDelete] = useState<Rider | null>(null);
+  const [riderToReject, setRiderToReject] = useState<PendingRider | null>(null);
+  const [riderToDisable, setRiderToDisable] = useState<Rider | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeScrollIndex, setActiveScrollIndex] = useState(0);
@@ -202,9 +206,18 @@ export default function DeliveryPartnersPage() {
   };
 
   const handleRejectRider = (rider: PendingRider) => {
-    setPendingRiders(pendingRiders.filter((r) => r.id !== rider.id));
-    setSuccessMessage("Rider Rejected Successfully");
-    setShowSuccessModal(true);
+    setRiderToReject(rider);
+    setShowRejectModal(true);
+  };
+
+  const handleConfirmReject = () => {
+    if (riderToReject) {
+      setPendingRiders(pendingRiders.filter((r) => r.id !== riderToReject.id));
+      setShowRejectModal(false);
+      setRiderToReject(null);
+      setSuccessMessage("Rider Rejected Successfully");
+      setShowSuccessModal(true);
+    }
   };
 
   const handleMetrics = (rider: Rider) => {
@@ -229,14 +242,25 @@ export default function DeliveryPartnersPage() {
   };
 
   const handleDisableRider = (rider: Rider) => {
-    setRiders(
-      riders.map((r) =>
-        r.id === rider.id ? { ...r, status: "Disabled" as const } : r,
-      ),
-    );
-    setShowMetrics(false);
-    setSuccessMessage("Rider Disabled Successfully");
-    setShowSuccessModal(true);
+    setRiderToDisable(rider);
+    setShowDisableModal(true);
+  };
+
+  const handleConfirmDisable = () => {
+    if (riderToDisable) {
+      setRiders(
+        riders.map((r) =>
+          r.id === riderToDisable.id
+            ? { ...r, status: "Disabled" as const }
+            : r,
+        ),
+      );
+      setShowDisableModal(false);
+      setShowMetrics(false);
+      setRiderToDisable(null);
+      setSuccessMessage("Rider Disabled Successfully");
+      setShowSuccessModal(true);
+    }
   };
 
   const handleDeleteClick = (rider: Rider) => {
@@ -463,6 +487,32 @@ export default function DeliveryPartnersPage() {
         title="Delete Rider"
         message="Are you sure you want to delete this? This action cannot be undone."
         confirmText="Delete"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
+      />
+
+      <ConfirmationModal
+        isOpen={showRejectModal}
+        onClose={() => {
+          setShowRejectModal(false);
+          setRiderToReject(null);
+        }}
+        onConfirm={handleConfirmReject}
+        title="Reject Rider"
+        message="Are you sure you want to reject this? This action cannot be undone."
+        confirmText="Reject"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
+      />
+
+      <ConfirmationModal
+        isOpen={showDisableModal}
+        onClose={() => {
+          setShowDisableModal(false);
+          setRiderToDisable(null);
+        }}
+        onConfirm={handleConfirmDisable}
+        title="Disable Rider"
+        message="Are you sure you want to disable this? This action cannot be undone."
+        confirmText="Disable"
         confirmButtonClass="bg-red-600 hover:bg-red-700"
       />
 

@@ -138,9 +138,15 @@ export default function VendorsPage() {
   const [showMetrics, setShowMetrics] = useState(false);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showDisableModal, setShowDisableModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [vendorToDelete, setVendorToDelete] = useState<Vendor | null>(null);
+  const [vendorToReject, setVendorToReject] = useState<PendingVendor | null>(
+    null,
+  );
+  const [vendorToDisable, setVendorToDisable] = useState<Vendor | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeScrollIndex, setActiveScrollIndex] = useState(0);
@@ -208,9 +214,20 @@ export default function VendorsPage() {
   };
 
   const handleRejectVendor = (vendor: PendingVendor) => {
-    setPendingVendors(pendingVendors.filter((v) => v.id !== vendor.id));
-    setSuccessMessage("Vendor Rejected Successfully");
-    setShowSuccessModal(true);
+    setVendorToReject(vendor);
+    setShowRejectModal(true);
+  };
+
+  const handleConfirmReject = () => {
+    if (vendorToReject) {
+      setPendingVendors(
+        pendingVendors.filter((v) => v.id !== vendorToReject.id),
+      );
+      setShowRejectModal(false);
+      setVendorToReject(null);
+      setSuccessMessage("Vendor Rejected Successfully");
+      setShowSuccessModal(true);
+    }
   };
 
   const handleMetrics = (vendor: Vendor) => {
@@ -235,14 +252,25 @@ export default function VendorsPage() {
   };
 
   const handleDisableVendor = (vendor: Vendor) => {
-    setVendors(
-      vendors.map((v) =>
-        v.id === vendor.id ? { ...v, status: "Disabled" } : v,
-      ),
-    );
-    setShowMetrics(false);
-    setSuccessMessage("Vendor Disabled Successfully");
-    setShowSuccessModal(true);
+    setVendorToDisable(vendor);
+    setShowDisableModal(true);
+  };
+
+  const handleConfirmDisable = () => {
+    if (vendorToDisable) {
+      setVendors(
+        vendors.map((v) =>
+          v.id === vendorToDisable.id
+            ? { ...v, status: "Disabled" as const }
+            : v,
+        ),
+      );
+      setShowDisableModal(false);
+      setShowMetrics(false);
+      setVendorToDisable(null);
+      setSuccessMessage("Vendor Disabled Successfully");
+      setShowSuccessModal(true);
+    }
   };
 
   const handleDeleteClick = (vendor: Vendor) => {
@@ -469,6 +497,32 @@ export default function VendorsPage() {
         title="Delete Vendor"
         message="Are you sure you want to delete this? This action cannot be undone."
         confirmText="Delete"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
+      />
+
+      <ConfirmationModal
+        isOpen={showRejectModal}
+        onClose={() => {
+          setShowRejectModal(false);
+          setVendorToReject(null);
+        }}
+        onConfirm={handleConfirmReject}
+        title="Reject Vendor"
+        message="Are you sure you want to reject this? This action cannot be undone."
+        confirmText="Reject"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
+      />
+
+      <ConfirmationModal
+        isOpen={showDisableModal}
+        onClose={() => {
+          setShowDisableModal(false);
+          setVendorToDisable(null);
+        }}
+        onConfirm={handleConfirmDisable}
+        title="Disable Vendor"
+        message="Are you sure you want to disable this? This action cannot be undone."
+        confirmText="Disable"
         confirmButtonClass="bg-red-600 hover:bg-red-700"
       />
 
