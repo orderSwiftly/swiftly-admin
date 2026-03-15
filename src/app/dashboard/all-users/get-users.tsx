@@ -1,17 +1,16 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import PulseLoader from "@/components/pulse-loader";
-import { getUsers, type User } from "@/lib/api/users"; // adjust path as needed
+import { getUsers, type User } from "@/lib/api/users";
 
 export default function GetUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     const checkScreenSize = () => setIsMobile(window.innerWidth < 768);
@@ -44,11 +43,7 @@ export default function GetUsers() {
       {isMobile ? (
         <div className="grid grid-cols-1 gap-4">
           {users.map((user) => (
-            <MobileUserCard
-              key={user._id}
-              user={user}
-              onClick={() => router.push(`/dashboard/all-users/${user._id}`)}
-            />
+            <MobileUserCard key={user._id} user={user} />
           ))}
         </div>
       ) : (
@@ -69,12 +64,7 @@ export default function GetUsers() {
             </thead>
             <tbody>
               {users.map((user, index) => (
-                <DesktopUserRow
-                  key={user._id}
-                  user={user}
-                  index={index}
-                  onClick={() => router.push(`/dashboard/all-users/${user._id}`)}
-                />
+                <DesktopUserRow key={user._id} user={user} index={index} />
               ))}
             </tbody>
           </table>
@@ -90,9 +80,8 @@ export default function GetUsers() {
   );
 }
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
-/** Sellers have a logo + businessName; everyone else has photo + fullname. */
 function resolveDisplayName(user: User) {
   return user.businessName ?? user.fullname ?? "Unknown";
 }
@@ -102,7 +91,6 @@ function resolveAvatar(user: User) {
 }
 
 function UserAvatar({ src, size }: { src: string | null; size: number }) {
-  const cls = `rounded-full object-cover`;
   if (src) {
     return (
       <Image
@@ -110,7 +98,7 @@ function UserAvatar({ src, size }: { src: string | null; size: number }) {
         alt="User"
         width={size}
         height={size}
-        className={cls}
+        className="rounded-full object-cover"
         style={{ width: size, height: size }}
       />
     );
@@ -127,11 +115,11 @@ function UserAvatar({ src, size }: { src: string | null; size: number }) {
 
 // ─── Mobile card ─────────────────────────────────────────────────────────────
 
-function MobileUserCard({ user, onClick }: { user: User; onClick: () => void }) {
+function MobileUserCard({ user }: { user: User }) {
   return (
-    <div
-      onClick={onClick}
-      className="bg-white/10 backdrop-blur-md border border-[var(--acc-clr)] rounded-lg p-4 shadow hover:bg-[var(--bg-clr)] cursor-pointer transition duration-200"
+    <Link
+      href={`/dashboard/all-users/${user._id}`}
+      className="block bg-white/10 backdrop-blur-md border border-[var(--acc-clr)] rounded-lg p-4 shadow hover:bg-[var(--bg-clr)] transition duration-200"
     >
       <div className="flex items-center gap-3 mb-3">
         <UserAvatar src={resolveAvatar(user)} size={48} />
@@ -153,41 +141,32 @@ function MobileUserCard({ user, onClick }: { user: User; onClick: () => void }) 
           span
         />
       </div>
-    </div>
+    </Link>
   );
 }
 
 // ─── Desktop row ─────────────────────────────────────────────────────────────
 
-function DesktopUserRow({
-  user,
-  index,
-  onClick,
-}: {
-  user: User;
-  index: number;
-  onClick: () => void;
-}) {
+function DesktopUserRow({ user, index }: { user: User; index: number }) {
   return (
-    <tr
-      onClick={onClick}
-      className="border-t hover:bg-[var(--bg-clr)] cursor-pointer transition duration-200"
-    >
+    <tr className="border-t hover:bg-[var(--bg-clr)] transition duration-200">
       <td className="py-3 px-4 text-[var(--acc-clr)] pry-ff">{index + 1}</td>
       <td className="py-3 px-4">
         <UserAvatar src={resolveAvatar(user)} size={40} />
       </td>
       <td className="py-3 px-4 text-[var(--txt-clr)] sec-ff">
-        {resolveDisplayName(user)}
+        <Link
+          href={`/dashboard/all-users/${user._id}`}
+          className="hover:underline hover:text-[var(--acc-clr)] transition-colors"
+        >
+          {resolveDisplayName(user)}
+        </Link>
       </td>
       <td className="py-3 px-4 text-[var(--txt-clr)] sec-ff">{user.email}</td>
       <td className="py-3 px-4 text-[var(--txt-clr)] sec-ff">
         {user.phoneNumber || "N/A"}
       </td>
-      <td className="py-3 px-4 text-[var(--txt-clr)] sec-ff">
-        {/* isVerifiedStudent removed — not in new response */}
-        —
-      </td>
+      <td className="py-3 px-4 text-[var(--txt-clr)] sec-ff">—</td>
       <td className="py-3 px-4 text-[var(--txt-clr)] sec-ff">
         {user.hasSubaccount ? "Yes" : "No"}
       </td>
@@ -201,7 +180,7 @@ function DesktopUserRow({
   );
 }
 
-// ─── Tiny label+value cell for mobile cards ──────────────────────────────────
+// ─── Field ────────────────────────────────────────────────────────────────────
 
 function Field({
   label,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import type { University } from "@/types/university";
 import type { AddUniversityData } from "@/types/university";
@@ -8,23 +8,31 @@ import { AddUniversityModal } from "@/components/university-management/add-unive
 import { EditUniversityModal } from "@/components/university-management/edit-university-modal";
 import { ConfirmationModal } from "@/components/user-management/confirmation-modal";
 import { SuccessModal } from "@/components/user-management/success-modal";
+import PulseLoader from "@/components/pulse-loader";
+import { getInstitutions, type Institution } from "@/lib/api/institution";
 
-const mockUniversities: University[] = Array.from({ length: 20 }, (_, i) => ({
-  id: String(i + 1),
-  name: i % 2 === 0 ? "UNILAG" : "Babcock",
-  email: i % 2 === 0 ? "Unilagexample@gmail.com" : "Babcockexample@gmail.com",
-  status: i % 2 === 0 ? "Disabled" : "Enabled",
-  location: i % 2 === 0 ? "Lagos" : "Ogun",
-  deliveryZone: i % 2 === 0 ? "Lagos" : "Ogun",
-  hours: 10,
-  fees: 300,
-}));
+// ─── Map API institution → local University shape ─────────────────────────────
+
+function mapInstitution(inst: Institution): University {
+  return {
+    id: inst._id,
+    name: inst.name,
+    email: "",                          // not in API response
+    status: "Enabled",                  // not in API response — default to Enabled
+    location: `${inst.address.city}, ${inst.address.state}`,
+    deliveryZone: inst.address.state,
+    hours: 10,
+    fees: 300,
+  };
+}
 
 const ITEMS_PER_PAGE = 15;
 
 export default function UniversitiesPage() {
-  const [universities, setUniversities] =
-    useState<University[]>(mockUniversities);
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -32,9 +40,21 @@ export default function UniversitiesPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [selectedUniversity, setSelectedUniversity] =
-    useState<University | null>(null);
+  const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
+
+  // ─── Fetch ───────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    getInstitutions()
+      .then((institutions) => setUniversities(institutions.map(mapInstitution)))
+      .catch((err) =>
+        setFetchError(err instanceof Error ? err.message : "Failed to load institutions")
+      )
+      .finally(() => setLoading(false));
+  }, []);
+
+  // ─── Filter + paginate ────────────────────────────────────────────────────────
 
   const query = searchQuery.toLowerCase().trim();
 
@@ -47,18 +67,17 @@ export default function UniversitiesPage() {
     );
   });
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredUniversities.length / ITEMS_PER_PAGE),
-  );
+  const totalPages = Math.max(1, Math.ceil(filteredUniversities.length / ITEMS_PER_PAGE));
   const paginatedUniversities = filteredUniversities.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
   );
 
+  // ─── Handlers ────────────────────────────────────────────────────────────────
+
   const handleAddUniversity = (data: AddUniversityData) => {
     const newUniversity: University = {
-      id: String(universities.length + 1),
+      id: String(Date.now()),
       name: data.name,
       email: data.email,
       status: "Enabled",
@@ -81,14 +100,10 @@ export default function UniversitiesPage() {
   const handleEnableDisable = (university: University) => {
     const newStatus = university.status === "Enabled" ? "Disabled" : "Enabled";
     setUniversities(
-      universities.map((u) =>
-        u.id === university.id ? { ...u, status: newStatus } : u,
-      ),
+      universities.map((u) => (u.id === university.id ? { ...u, status: newStatus } : u))
     );
     setShowEditModal(false);
-    setSuccessMessage(
-      `University ${newStatus === "Enabled" ? "Enabled" : "Disabled"} Successfully`,
-    );
+    setSuccessMessage(`University ${newStatus} Successfully`);
     setShowSuccessModal(true);
   };
 
@@ -99,9 +114,7 @@ export default function UniversitiesPage() {
 
   const handleConfirmDelete = () => {
     if (selectedUniversity) {
-      setUniversities(
-        universities.filter((u) => u.id !== selectedUniversity.id),
-      );
+      setUniversities(universities.filter((u) => u.id !== selectedUniversity.id));
       setShowDeleteModal(false);
       setShowEditModal(false);
       setSuccessMessage("University Deleted Successfully");
@@ -110,9 +123,7 @@ export default function UniversitiesPage() {
   };
 
   const handleSaveEdit = (updated: University) => {
-    setUniversities(
-      universities.map((u) => (u.id === updated.id ? updated : u)),
-    );
+    setUniversities(universities.map((u) => (u.id === updated.id ? updated : u)));
     setShowEditModal(false);
     setSuccessMessage("University Updated Successfully");
     setShowSuccessModal(true);
@@ -124,24 +135,27 @@ export default function UniversitiesPage() {
     setSelectedUniversity(null);
   };
 
+  // ─── Helpers ─────────────────────────────────────────────────────────────────
+
   const getStatusBadge = (status: string) => {
     const isEnabled = status === "Enabled";
     return (
       <span
-        className={`inline-flex items-center justify-center px-4 py-2 rounded-[6px] text-xs font-semibold ${
-          isEnabled
-            ? "bg-[#D8FF9C] text-[#669917]"
-            : "bg-[#FFB0A8] text-[#993127]"
-        }`}
+        className={`inline-flex items-center justify-center px-4 py-2 rounded-[6px] text-xs font-semibold ${isEnabled ? "bg-[#D8FF9C] text-[#669917]" : "bg-[#FFB0A8] text-[#993127]"
+          }`}
       >
         {status}
       </span>
     );
   };
 
+  // ─── Render ──────────────────────────────────────────────────────────────────
+
   return (
     <div className="p-4 md:p-6 min-h-screen">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+
+        {/* Toolbar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="relative flex-1 max-w-lg w-full">
             <Search
@@ -167,109 +181,119 @@ export default function UniversitiesPage() {
           </button>
         </div>
 
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                <th className="pb-3 pl-2">Name</th>
-                <th className="pb-3">Status</th>
-                <th className="pb-3">Email</th>
-                <th className="pb-3">Location</th>
-                <th className="pb-3 text-right pr-2">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {paginatedUniversities.map((university) => (
-                <tr
-                  key={university.id}
-                  className="text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <td className="py-3 pl-2 font-medium">{university.name}</td>
-                  <td className="py-3">{getStatusBadge(university.status)}</td>
-                  <td className="py-3 text-gray-500">{university.email}</td>
-                  <td className="py-3 text-gray-500">{university.location}</td>
-                  <td className="py-3 text-right pr-2">
-                    <button
-                      onClick={() => handleEdit(university)}
-                      className="px-4 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {paginatedUniversities.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="py-12 text-center text-gray-400 text-sm"
-                  >
-                    No universities found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        {/* Loading / error */}
+        {loading && (
+          <div className="flex justify-center py-12">
+            <PulseLoader />
+          </div>
+        )}
+        {fetchError && (
+          <p className="text-center py-12 text-sm text-red-500">{fetchError}</p>
+        )}
 
-        <div className="md:hidden space-y-3">
-          {paginatedUniversities.map((university) => (
-            <div
-              key={university.id}
-              className="border border-gray-100 rounded-xl p-4 space-y-2"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-gray-900 text-sm">
-                  {university.name}
-                </span>
-                {getStatusBadge(university.status)}
-              </div>
-              <div className="text-xs text-gray-500">{university.email}</div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">
-                  {university.location}
-                </span>
+        {!loading && !fetchError && (
+          <>
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="pb-3 pl-2">Name</th>
+                    <th className="pb-3">Status</th>
+                    <th className="pb-3">Location</th>
+                    <th className="pb-3 text-right pr-2">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {paginatedUniversities.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="py-12 text-center text-gray-400 text-sm">
+                        No universities found.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedUniversities.map((university) => (
+                      <tr
+                        key={university.id}
+                        className="text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="py-3 pl-2 font-medium">{university.name}</td>
+                        <td className="py-3">{getStatusBadge(university.status)}</td>
+                        <td className="py-3 text-gray-500">{university.location}</td>
+                        <td className="py-3 text-right pr-2">
+                          <button
+                            onClick={() => handleEdit(university)}
+                            className="px-4 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="md:hidden space-y-3">
+              {paginatedUniversities.length === 0 ? (
+                <div className="py-12 text-center text-gray-400 text-sm">
+                  No universities found.
+                </div>
+              ) : (
+                paginatedUniversities.map((university) => (
+                  <div
+                    key={university.id}
+                    className="border border-gray-100 rounded-xl p-4 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-900 text-sm">
+                        {university.name}
+                      </span>
+                      {getStatusBadge(university.status)}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">{university.location}</span>
+                      <button
+                        onClick={() => handleEdit(university)}
+                        className="px-4 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+              <span className="text-sm text-gray-500">
+                Page {currentPage} of {totalPages} · {filteredUniversities.length} institution{filteredUniversities.length !== 1 ? "s" : ""}
+              </span>
+              <div className="flex gap-2">
                 <button
-                  onClick={() => handleEdit(university)}
-                  className="px-4 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
-                  Edit
+                  Previous
+                </button>
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                >
+                  Next
                 </button>
               </div>
             </div>
-          ))}
-          {paginatedUniversities.length === 0 && (
-            <div className="py-12 text-center text-gray-400 text-sm">
-              No universities found.
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
-          <span className="text-sm text-gray-500">
-            Page {currentPage} of {totalPages}
-          </span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-            >
-              Previous
-            </button>
-            <button
-              onClick={() =>
-                setCurrentPage(Math.min(totalPages, currentPage + 1))
-              }
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
+      {/* Modals */}
       <AddUniversityModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}

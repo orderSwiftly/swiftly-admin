@@ -28,7 +28,7 @@ const navItems = [
     href: "/dashboard/universities",
     icon: Building2,
   },
-  { label: "Vendor Management", href: "/dashboard/vendors", icon: Store },
+  // { label: "Vendor Management", href: "/dashboard/vendors", icon: Store },
   {
     label: "Delivery Partner Management",
     href: "/dashboard/delivery-partners",
