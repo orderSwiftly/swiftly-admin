@@ -152,7 +152,7 @@ export default function UniversitiesPage() {
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="p-4 md:p-6 min-h-screen">
+    <div className="p-4 md:p-6 min-h-screen sec-ff">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
 
         {/* Toolbar */}
