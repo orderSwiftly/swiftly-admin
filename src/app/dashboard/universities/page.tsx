@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import type { University } from "@/types/university";
-import type { AddUniversityData } from "@/types/university";
 import { AddUniversityModal } from "@/components/university-management/add-university-modal";
 import { EditUniversityModal } from "@/components/university-management/edit-university-modal";
-import { ConfirmationModal } from "@/components/user-management/confirmation-modal";
 import { SuccessModal } from "@/components/user-management/success-modal";
 import PulseLoader from "@/components/pulse-loader";
 import { getInstitutions, type Institution } from "@/lib/api/institution";
@@ -17,8 +15,8 @@ function mapInstitution(inst: Institution): University {
   return {
     id: inst._id,
     name: inst.name,
-    email: "",                          // not in API response
-    status: "Enabled",                  // not in API response — default to Enabled
+    email: "",
+    status: "Enabled",
     location: `${inst.address.city}, ${inst.address.state}`,
     deliveryZone: inst.address.state,
     hours: 10,
@@ -38,7 +36,6 @@ export default function UniversitiesPage() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
@@ -62,7 +59,6 @@ export default function UniversitiesPage() {
     if (!query) return true;
     return (
       u.name.toLowerCase().includes(query) ||
-      u.email.toLowerCase().includes(query) ||
       u.location.toLowerCase().includes(query)
     );
   });
@@ -75,18 +71,8 @@ export default function UniversitiesPage() {
 
   // ─── Handlers ────────────────────────────────────────────────────────────────
 
-  const handleAddUniversity = (data: AddUniversityData) => {
-    const newUniversity: University = {
-      id: String(Date.now()),
-      name: data.name,
-      email: data.email,
-      status: "Enabled",
-      location: data.state,
-      deliveryZone: data.state,
-      hours: 10,
-      fees: 300,
-    };
-    setUniversities([newUniversity, ...universities]);
+  const handleAddUniversity = (institution: Institution) => {
+    setUniversities([mapInstitution(institution), ...universities]);
     setShowAddModal(false);
     setSuccessMessage("University Added Successfully");
     setShowSuccessModal(true);
@@ -107,23 +93,18 @@ export default function UniversitiesPage() {
     setShowSuccessModal(true);
   };
 
+  // Called by EditUniversityModal after the API delete succeeds
   const handleDeleteClick = (university: University) => {
-    setSelectedUniversity(university);
-    setShowDeleteModal(true);
+    setUniversities(universities.filter((u) => u.id !== university.id));
+    setShowEditModal(false);
+    setSuccessMessage("University Deleted Successfully");
+    setShowSuccessModal(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (selectedUniversity) {
-      setUniversities(universities.filter((u) => u.id !== selectedUniversity.id));
-      setShowDeleteModal(false);
-      setShowEditModal(false);
-      setSuccessMessage("University Deleted Successfully");
-      setShowSuccessModal(true);
-    }
-  };
-
-  const handleSaveEdit = (updated: University) => {
-    setUniversities(universities.map((u) => (u.id === updated.id ? updated : u)));
+  const handleSaveEdit = (institution: Institution) => {
+    setUniversities(universities.map((u) =>
+      u.id === institution._id ? mapInstitution(institution) : u
+    ));
     setShowEditModal(false);
     setSuccessMessage("University Updated Successfully");
     setShowSuccessModal(true);
@@ -158,18 +139,12 @@ export default function UniversitiesPage() {
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="relative flex-1 max-w-lg w-full">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={18}
-            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
               placeholder="Search"
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-800 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
@@ -182,14 +157,8 @@ export default function UniversitiesPage() {
         </div>
 
         {/* Loading / error */}
-        {loading && (
-          <div className="flex justify-center py-12">
-            <PulseLoader />
-          </div>
-        )}
-        {fetchError && (
-          <p className="text-center py-12 text-sm text-red-500">{fetchError}</p>
-        )}
+        {loading && <div className="flex justify-center py-12"><PulseLoader /></div>}
+        {fetchError && <p className="text-center py-12 text-sm text-red-500">{fetchError}</p>}
 
         {!loading && !fetchError && (
           <>
@@ -213,10 +182,7 @@ export default function UniversitiesPage() {
                     </tr>
                   ) : (
                     paginatedUniversities.map((university) => (
-                      <tr
-                        key={university.id}
-                        className="text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
+                      <tr key={university.id} className="text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                         <td className="py-3 pl-2 font-medium">{university.name}</td>
                         <td className="py-3">{getStatusBadge(university.status)}</td>
                         <td className="py-3 text-gray-500">{university.location}</td>
@@ -238,19 +204,12 @@ export default function UniversitiesPage() {
             {/* Mobile cards */}
             <div className="md:hidden space-y-3">
               {paginatedUniversities.length === 0 ? (
-                <div className="py-12 text-center text-gray-400 text-sm">
-                  No universities found.
-                </div>
+                <div className="py-12 text-center text-gray-400 text-sm">No universities found.</div>
               ) : (
                 paginatedUniversities.map((university) => (
-                  <div
-                    key={university.id}
-                    className="border border-gray-100 rounded-xl p-4 space-y-2"
-                  >
+                  <div key={university.id} className="border border-gray-100 rounded-xl p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-900 text-sm">
-                        {university.name}
-                      </span>
+                      <span className="font-medium text-gray-900 text-sm">{university.name}</span>
                       {getStatusBadge(university.status)}
                     </div>
                     <div className="flex items-center justify-between">
@@ -307,16 +266,6 @@ export default function UniversitiesPage() {
         onEnableDisable={handleEnableDisable}
         onDelete={handleDeleteClick}
         onSave={handleSaveEdit}
-      />
-
-      <ConfirmationModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleConfirmDelete}
-        title="Delete University"
-        message="Are you sure you want to delete this? This action cannot be undone."
-        confirmText="Delete"
-        confirmButtonClass="bg-red-600 hover:bg-red-700"
       />
 
       <SuccessModal

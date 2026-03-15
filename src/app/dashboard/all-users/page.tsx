@@ -184,14 +184,6 @@ export default function AllUsersPage() {
               />
             </div>
 
-            {/* Add user */}
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-[#C8FF73] text-[#669917] rounded-lg font-medium hover:bg-[#A6D94A] transition-colors cursor-pointer whitespace-nowrap"
-            >
-              <Plus size={20} />
-              Add Users
-            </button>
 
             {/* Role filter */}
             <div className="relative min-w-[120px] sm:min-w-[140px]">
@@ -353,13 +345,6 @@ export default function AllUsersPage() {
           )}
         </div>
       </div>
-
-      {/* ── Modals ──────────────────────────────────────────────────────────── */}
-      <AddUserModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSubmit={handleAddUser}
-      />
 
       <EditUserModal
         isOpen={isEditModalOpen}

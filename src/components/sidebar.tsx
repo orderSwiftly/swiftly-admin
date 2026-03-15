@@ -37,21 +37,21 @@ const navItems = [
     href: "/dashboard/orders",
     icon: Truck,
   },
-  {
-    label: "Financial & Pricing Controls",
-    href: "/dashboard/financial",
-    icon: DollarSign,
-  },
-  {
-    label: "Security & Verification",
-    href: "/dashboard/security",
-    icon: Shield,
-  },
-  {
-    label: "Platform Configuration",
-    href: "/dashboard/configuration",
-    icon: Settings,
-  },
+  // {
+  //   label: "Financial & Pricing Controls",
+  //   href: "/dashboard/financial",
+  //   icon: DollarSign,
+  // },
+  // {
+  //   label: "Security & Verification",
+  //   href: "/dashboard/security",
+  //   icon: Shield,
+  // },
+  // {
+  //   label: "Platform Configuration",
+  //   href: "/dashboard/configuration",
+  //   icon: Settings,
+  // },
 ];
 
 const Sidebar = () => {
