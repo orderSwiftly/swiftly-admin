@@ -4,8 +4,6 @@ import {
   Home,
   Users,
   Building2,
-  Store,
-  Bike,
   Truck,
   DollarSign,
   Shield,
@@ -29,11 +27,11 @@ const navItems = [
     icon: Building2,
   },
   // { label: "Vendor Management", href: "/dashboard/vendors", icon: Store },
-  {
-    label: "Delivery Partner Management",
-    href: "/dashboard/delivery-partners",
-    icon: Bike,
-  },
+  // {
+  //   label: "Delivery Partner Management",
+  //   href: "/dashboard/delivery-partners",
+  //   icon: Bike,
+  // },
   {
     label: "Order & Delivery Oversight",
     href: "/dashboard/orders",
