@@ -1,108 +1,46 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, ChevronDown, Plus } from "lucide-react";
 import { User, AddUserData, EditUserData } from "@/types/user";
 import { AddUserModal } from "@/components/user-management/add-user-modal";
 import { EditUserModal } from "@/components/user-management/edit-user-modal";
 import { ConfirmationModal } from "@/components/user-management/confirmation-modal";
 import { SuccessModal } from "@/components/user-management/success-modal";
+import { getUsers, type User as ApiUser } from "@/lib/api/users"; // adjust path as needed
 
-const mockUsers: User[] = [
-  {
-    id: "1",
-    name: "John doe",
-    email: "example@gmail.com",
-    phoneNumber: "+234123456789",
-    status: "Inactive",
-    role: "Admin - High",
-    userType: "Admin - High",
-  },
-  {
-    id: "2",
-    name: "Jill doe",
-    email: "example@gmail.com",
-    phoneNumber: "+234123456789",
+// ─── Map API user → local User shape ────────────────────────────────────────
+
+function mapApiUser(apiUser: ApiUser): User {
+  return {
+    id: apiUser._id,
+    name: apiUser.businessName ?? apiUser.fullname ?? "Unknown",
+    email: apiUser.email,
+    phoneNumber: apiUser.phoneNumber ?? "",
+    // API doesn't return a status field yet — default to "Active"
     status: "Active",
-    role: "Vendor",
-    userType: "Vendor",
-  },
-  {
-    id: "3",
-    name: "jimoh Ahmed",
-    email: "example@gmail.com",
-    phoneNumber: "+234123456789",
-    status: "Removed",
-    role: "Customer",
-    userType: "Customer",
-  },
-  {
-    id: "4",
-    name: "Shitu usman",
-    email: "example@gmail.com",
-    phoneNumber: "+234123456789",
-    status: "Inactive",
-    role: "Admin - Low",
-    userType: "Admin - Low",
-  },
-  {
-    id: "5",
-    name: "Mike jack",
-    email: "example@gmail.com",
-    phoneNumber: "+234123456789",
-    status: "Active",
-    role: "Rider",
-    userType: "Rider",
-  },
-  {
-    id: "6",
-    name: "jimoh Ahmed",
-    email: "example@gmail.com",
-    phoneNumber: "+234123456789",
-    status: "Removed",
-    role: "Customer",
-    userType: "Customer",
-  },
-  {
-    id: "7",
-    name: "Shitu usman",
-    email: "example@gmail.com",
-    phoneNumber: "+234123456789",
-    status: "Inactive",
-    role: "Admin - Low",
-    userType: "Admin - Low",
-  },
-  {
-    id: "8",
-    name: "Mike jack",
-    email: "example@gmail.com",
-    phoneNumber: "+234123456789",
-    status: "Active",
-    role: "Rider",
-    userType: "Rider",
-  },
-  {
-    id: "9",
-    name: "jimoh Ahmed",
-    email: "example@gmail.com",
-    phoneNumber: "+234123456789",
-    status: "Removed",
-    role: "Customer",
-    userType: "Customer",
-  },
-  {
-    id: "10",
-    name: "Shitu usman",
-    email: "example@gmail.com",
-    phoneNumber: "+234123456789",
-    status: "Inactive",
-    role: "Admin - Low",
-    userType: "Admin - Low",
-  },
-];
+    role: capitalizeRole(apiUser.role),
+    userType: capitalizeRole(apiUser.role),
+  };
+}
+
+function capitalizeRole(role: string) {
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const ITEMS_PER_PAGE = 10;
+
+const ROLES = ["All Roles", "Buyer", "Seller", "Rider", "Admin"];
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function AllUsersPage() {
-  const [users] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("All Roles");
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,37 +51,52 @@ export default function AllUsersPage() {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isSuspendConfirmOpen, setIsSuspendConfirmOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState({
-    title: "",
-    message: "",
-  });
+  const [successMessage, setSuccessMessage] = useState({ title: "", message: "" });
 
-  const totalPages = 10;
-  
+  // ─── Fetch ─────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    getUsers()
+      .then((apiUsers) => setUsers(apiUsers.map(mapApiUser)))
+      .catch((err) =>
+        setFetchError(err instanceof Error ? err.message : "Failed to load users")
+      )
+      .finally(() => setLoading(false));
+  }, []);
+
+  // ─── Filter + paginate ─────────────────────────────────────────────────────
 
   const filteredUsers = users.filter((user) => {
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchQuery.toLowerCase());
+      user.name.toLowerCase().includes(q) ||
+      user.email.toLowerCase().includes(q) ||
+      user.role.toLowerCase().includes(q);
 
-    const matchesRole = roleFilter === "All Roles" || user.role === roleFilter;
+    const matchesRole =
+      roleFilter === "All Roles" || user.role === roleFilter;
 
     return matchesSearch && matchesRole;
   });
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case "Active":
-        return "bg-green-100 text-green-700";
-      case "Inactive":
-        return "bg-yellow-100 text-yellow-700";
-      case "Removed":
-        return "bg-red-100 text-red-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / ITEMS_PER_PAGE));
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Reset to page 1 whenever filters change
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
   };
+
+  const handleRoleFilter = (value: string) => {
+    setRoleFilter(value);
+    setCurrentPage(1);
+  };
+
+  // ─── Actions ───────────────────────────────────────────────────────────────
 
   const handleAddUser = (data: AddUserData) => {
     console.log("Adding user:", data);
@@ -168,10 +121,7 @@ export default function AllUsersPage() {
   const handleActivateUser = () => {
     console.log("Activating user:", selectedUser);
     setIsEditModalOpen(false);
-    setSuccessMessage({
-      title: "User Activated Successfully",
-      message: "",
-    });
+    setSuccessMessage({ title: "User Activated Successfully", message: "" });
     setIsSuccessModalOpen(true);
   };
 
@@ -183,10 +133,7 @@ export default function AllUsersPage() {
   const confirmSuspend = () => {
     console.log("Suspending user:", selectedUser);
     setIsSuspendConfirmOpen(false);
-    setSuccessMessage({
-      title: "User Suspended Successfully",
-      message: "",
-    });
+    setSuccessMessage({ title: "User Suspended Successfully", message: "" });
     setIsSuccessModalOpen(true);
   };
 
@@ -198,18 +145,31 @@ export default function AllUsersPage() {
   const confirmDelete = () => {
     console.log("Deleting user:", selectedUser);
     setIsDeleteConfirmOpen(false);
-    setSuccessMessage({
-      title: "User Deleted Successfully",
-      message: "",
-    });
+    setSuccessMessage({ title: "User Deleted Successfully", message: "" });
     setIsSuccessModalOpen(true);
   };
+
+  // ─── Helpers ───────────────────────────────────────────────────────────────
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case "Active": return "bg-green-100 text-green-700";
+      case "Inactive": return "bg-yellow-100 text-yellow-700";
+      case "Removed": return "bg-red-100 text-red-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
     <main className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6">
+
+          {/* ── Toolbar ─────────────────────────────────────────────────── */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
+            {/* Search */}
             <div className="flex-1 relative">
               <Search
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -217,13 +177,14 @@ export default function AllUsersPage() {
               />
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Search by name, email or role…"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent cursor-pointer"
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
 
+            {/* Add user */}
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-[#C8FF73] text-[#669917] rounded-lg font-medium hover:bg-[#A6D94A] transition-colors cursor-pointer whitespace-nowrap"
@@ -232,18 +193,16 @@ export default function AllUsersPage() {
               Add Users
             </button>
 
+            {/* Role filter */}
             <div className="relative min-w-[120px] sm:min-w-[140px]">
               <select
                 value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
+                onChange={(e) => handleRoleFilter(e.target.value)}
                 className="w-full appearance-none px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent cursor-pointer"
               >
-                <option>All Roles</option>
-                <option>Admin - High</option>
-                <option>Admin - Low</option>
-                <option>Vendor</option>
-                <option>Rider</option>
-                <option>Customer</option>
+                {ROLES.map((r) => (
+                  <option key={r}>{r}</option>
+                ))}
               </select>
               <ChevronDown
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -252,125 +211,150 @@ export default function AllUsersPage() {
             </div>
           </div>
 
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    NAME
-                  </th>
-                  <th className="text-left py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    STATUS
-                  </th>
-                  <th className="text-left py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    EMAIL
-                  </th>
-                  <th className="text-left py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ROLE
-                  </th>
-                  <th className="text-left py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ACTION
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
-                  >
-                    <td className="py-4 px-4 text-sm text-gray-900">
-                      {user.name}
-                    </td>
-                    <td className="py-4 px-4">
-                      <span
-                        className={`inline-flex px-4 py-2 rounded-[6px] text-xs font-medium ${getStatusBadgeClass(
-                          user.status,
-                        )}`}
-                      >
-                        {user.status}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-sm text-gray-600">
-                      {user.email}
-                    </td>
-                    <td className="py-4 px-4 text-sm text-gray-900">
-                      {user.role}
-                    </td>
-                    <td className="py-4 px-4">
-                      <button
-                        onClick={() => handleEditUser(user)}
-                        className="px-4 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                      >
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* ── Loading / error states ───────────────────────────────────── */}
+          {loading && (
+            <p className="text-center py-12 text-sm text-gray-500">
+              Loading users…
+            </p>
+          )}
+          {fetchError && (
+            <p className="text-center py-12 text-sm text-red-500">
+              {fetchError}
+            </p>
+          )}
 
-          <div className="md:hidden space-y-3">
-            {filteredUsers.map((user) => (
-              <div
-                key={user.id}
-                className="bg-gray-50 rounded-lg p-4 border border-gray-200"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-sm mb-1">
-                      {user.name}
-                    </h3>
-                    <p className="text-xs text-gray-600">{user.email}</p>
-                  </div>
-                  <span
-                    className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(
-                      user.status,
-                    )}`}
-                  >
-                    {user.status}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-600">{user.role}</span>
+          {/* ── Desktop table ────────────────────────────────────────────── */}
+          {!loading && !fetchError && (
+            <>
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      {["NAME", "STATUS", "EMAIL", "ROLE", "ACTION"].map((h) => (
+                        <th
+                          key={h}
+                          className="text-left py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedUsers.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="py-12 text-center text-sm text-gray-400"
+                        >
+                          No users match your search.
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedUsers.map((user) => (
+                        <tr
+                          key={user.id}
+                          className="border-b border-gray-100 hover:bg-gray-50"
+                        >
+                          <td className="py-4 px-4 text-sm text-gray-900">
+                            {user.name}
+                          </td>
+                          <td className="py-4 px-4">
+                            <span
+                              className={`inline-flex px-4 py-2 rounded-[6px] text-xs font-medium ${getStatusBadgeClass(user.status)}`}
+                            >
+                              {user.status}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4 text-sm text-gray-600">
+                            {user.email}
+                          </td>
+                          <td className="py-4 px-4 text-sm text-gray-900">
+                            {user.role}
+                          </td>
+                          <td className="py-4 px-4">
+                            <button
+                              onClick={() => handleEditUser(user)}
+                              className="px-4 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                            >
+                              Edit
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ── Mobile cards ─────────────────────────────────────────── */}
+              <div className="md:hidden space-y-3">
+                {paginatedUsers.length === 0 ? (
+                  <p className="text-center py-12 text-sm text-gray-400">
+                    No users match your search.
+                  </p>
+                ) : (
+                  paginatedUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 text-sm mb-1">
+                            {user.name}
+                          </h3>
+                          <p className="text-xs text-gray-600">{user.email}</p>
+                        </div>
+                        <span
+                          className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(user.status)}`}
+                        >
+                          {user.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-600">{user.role}</span>
+                        <button
+                          onClick={() => handleEditUser(user)}
+                          className="px-3 py-1.5 text-xs text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* ── Pagination ───────────────────────────────────────────── */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 mt-4 sm:mt-6">
+                <span className="text-xs sm:text-sm text-gray-600">
+                  Page {currentPage} of {totalPages} &nbsp;·&nbsp;{" "}
+                  {filteredUsers.length} user{filteredUsers.length !== 1 ? "s" : ""}
+                </span>
+                <div className="flex gap-2">
                   <button
-                    onClick={() => handleEditUser(user)}
-                    className="px-3 py-1.5 text-xs text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                   >
-                    Edit
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  >
+                    Next
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 mt-4 sm:mt-6">
-            <span className="text-xs sm:text-sm text-gray-600">
-              Page {currentPage} of {totalPages}
-            </span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() =>
-                  setCurrentPage(Math.min(totalPages, currentPage + 1))
-                }
-                disabled={currentPage === totalPages}
-                className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              >
-                Next
-              </button>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
 
+      {/* ── Modals ──────────────────────────────────────────────────────────── */}
       <AddUserModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
