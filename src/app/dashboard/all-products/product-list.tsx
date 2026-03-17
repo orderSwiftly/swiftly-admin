@@ -41,7 +41,7 @@ export default function ProductList() {
       const data = await res.json();
 
       if (res.ok && data.status === 'success') {
-        setProducts(data.data.enrichedProducts ?? []);
+        setProducts(data.data.products ?? []);
       } else {
         setError(data.message ?? 'Failed to fetch products');
         toast.error(data.message ?? 'Failed to fetch products');
@@ -124,7 +124,7 @@ export default function ProductList() {
           height={200}
           className="mx-auto mb-4"
         />
-        <h3 className="text-lg font-semibold text-[var(--txt-clr)] sec-ff">No Products Available</h3>
+        <h3 className="text-lg font-semibold text-[var(--prof-clr)] sec-ff">No Products Available</h3>
         <p className="text-gray-500 sec-ff">You haven’t added any products yet.</p>
       </div>
     );
@@ -134,7 +134,7 @@ export default function ProductList() {
         {products.map((product) => (
           <li
             key={product._id}
-            className="bg-white dark:bg-[var(--bg-clr)] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700 flex flex-col"
+            className="bg-white dark:bg-[var(--txt-clr)] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700 flex flex-col"
           >
             {/* Product Image */}
             <div className="relative w-full h-48 overflow-hidden">
@@ -164,7 +164,7 @@ export default function ProductList() {
                   {product.description}
                 </p>
 
-                <p className="text-xl font-bold text-[var(--txt-clr)] sec-ff mb-3">
+                <p className="text-xl font-bold text-[var(--bg-clr)] sec-ff mb-3">
                   ₦{product.price.toLocaleString()}
                 </p>
 
@@ -173,7 +173,7 @@ export default function ProductList() {
                     className={`px-2 py-1 rounded-md ${
                       product.stock === 0
                       ? 'bg-red-600 text-white'
-                      : 'bg-gray-100 dark:bg-white/10 text-black dark:text-white'
+                      : 'bg-gray-100 dark:bg-white/10 text-black text-[var(--pry-clr)]'
                     }`}
                   >
                     {product.stock === 0 ? 'Sold Out' : `Stock: ${product.stock}`}
@@ -233,7 +233,7 @@ export default function ProductList() {
 
   return (
     <main className="p-4 md:p-6">
-      <h2 className="text-xl md:text-2xl font-bold mb-6 text-[var(--txt-clr)] pry-ff">
+      <h2 className="text-xl md:text-2xl font-bold mb-6 text-[var(--prof-clr)] pry-ff">
         Your Products
       </h2>
       {content}

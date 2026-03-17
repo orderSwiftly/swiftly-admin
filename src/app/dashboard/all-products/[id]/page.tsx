@@ -82,9 +82,9 @@ export default function ProductDetails() {
   if (!product) return <p className="text-center py-10 text-red-500">Product not found.</p>;
 
   return (
-    <div className="mx-auto p-4 sm:p-6 bg-[var(--light-bg)] text-[var(--txt-clr)]">
+    <div className="mx-auto p-4 sm:p-6">
       {/* Title */}
-      <h1 className="text-2xl sm:text-3xl font-bold mb-4 pry-ff">{product.title}</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-4 pry-ff text-[var(--prof-clr)]">{product.title}</h1>
 
       {/* Main Image */}
       <div className="relative w-full h-[300px] sm:h-[400px] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md mb-4">
@@ -114,8 +114,8 @@ export default function ProductDetails() {
       )}
 
       {/* Product Details */}
-      <div className="bg-[var(--light-bg)] dark:bg-[var(--bg-clr)] p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700">
-        <p className="text-gray-700 dark:text-gray-300 mb-4 sec-ff leading-relaxed">
+      <div className="bg-[var(--txt-clr)] p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700 mb-5">
+        <p className="text-[var(--prof-clr)] mb-4 sec-ff leading-relaxed">
           {product.description}
         </p>
 
@@ -126,7 +126,7 @@ export default function ProductDetails() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300 sec-ff">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700 sec-ff">
           <p><span className="font-medium">Price:</span> ₦{product.price.toLocaleString()}</p>
           <p><span className="font-medium">Stock:</span> {product.stock}</p>
           <p><span className="font-medium">Location:</span> {product.location}</p>
@@ -148,8 +148,8 @@ export default function ProductDetails() {
       </div>
 
       {/* Reviews Section */}
-      <div className="bg-white dark:bg-[var(--bg-clr)] p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-bold mb-4 pry-ff">Customer Reviews</h2>
+      <div className="bg-white dark:bg-[var(--txt-clr)] p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700">
+        <h2 className="text-lg font-bold mb-4 pry-ff text-[var(--pry-clr)]">Customer Reviews</h2>
         {reviews.length === 0 ? (
           <p className="text-gray-500 sec-ff">No reviews yet for this product.</p>
         ) : (

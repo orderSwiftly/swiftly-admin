@@ -5,9 +5,7 @@ import {
   Users,
   Building2,
   Truck,
-  DollarSign,
-  Shield,
-  Settings,
+  Package,
   LogOut,
 } from "lucide-react";
 import Link from "next/link";
@@ -36,6 +34,11 @@ const navItems = [
     label: "Order & Delivery Oversight",
     href: "/dashboard/orders",
     icon: Truck,
+  },
+  {
+    label: "Product Management",
+    href: "/dashboard/all-products",
+    icon: Package,
   },
   // {
   //   label: "Financial & Pricing Controls",

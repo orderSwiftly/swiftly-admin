@@ -9,12 +9,14 @@ import {
 import {
   TrendingUp, TrendingDown, ShoppingBag, Users,
   School, ClipboardList, Store, UserCheck, Bike, CalendarDays,
+  LogOut,
 } from "lucide-react";
 import PulseLoader from "@/components/pulse-loader";
 import {
   getDashboardStats,
   type DashboardStats,
 } from "@/lib/api/dashboard";
+import { useRouter } from "next/navigation";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
@@ -116,7 +118,6 @@ function buildCountsChartData(stats: DashboardStats) {
   ];
 }
 
-// Simulate a trend line using today vs total for area chart
 function buildTrendData(stats: DashboardStats) {
   return [
     {
@@ -146,6 +147,8 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     getDashboardStats()
@@ -153,6 +156,26 @@ export default function DashboardPage() {
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load stats"))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      setLoggingOut(true);
+      const api_url = process.env.NEXT_PUBLIC_API_URL;
+      const token = localStorage.getItem("admin_token");
+
+      await fetch(`${api_url}/api/v1/auth/super-admin/logout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      localStorage.removeItem("admin_token");
+      router.push("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    } finally {
+      setLoggingOut(false);
+    }
+  };
 
   if (loading)
     return (
@@ -184,7 +207,18 @@ export default function DashboardPage() {
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
 
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        {/* ── Top bar ──────────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-gray-200 text-sm font-semibold text-gray-600 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-50"
+          >
+            <LogOut size={15} />
+            {loggingOut ? "Signing out…" : "Sign Out"}
+          </button>
+        </div>
 
         {/* ── Charts row ───────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
