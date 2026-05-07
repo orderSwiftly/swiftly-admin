@@ -115,7 +115,7 @@ const Sidebar = () => {
       </div>
 
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around py-2 z-50">
-        {navItems.slice(0, 4).map(({ href, icon: Icon, label }) => {
+        {navItems.slice(0, 5).map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href;
           return (
             <Link
