@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, ChevronDown, Plus } from "lucide-react";
-import { User, AddUserData, EditUserData } from "@/types/user";
-import { AddUserModal } from "@/components/user-management/add-user-modal";
+import { Search, ChevronDown } from "lucide-react";
+import { User, EditUserData } from "@/types/user";
 import { EditUserModal } from "@/components/user-management/edit-user-modal";
 import { ConfirmationModal } from "@/components/user-management/confirmation-modal";
 import { SuccessModal } from "@/components/user-management/success-modal";
-import { getUsers, type User as ApiUser } from "@/lib/api/users"; // adjust path as needed
+import { getUsers, type User as ApiUser } from "@/lib/api/users";
 
 // ─── Map API user → local User shape ────────────────────────────────────────
 
@@ -17,7 +16,6 @@ function mapApiUser(apiUser: ApiUser): User {
     name: apiUser.businessName ?? apiUser.fullname ?? "Unknown",
     email: apiUser.email,
     phoneNumber: apiUser.phoneNumber ?? "",
-    // API doesn't return a status field yet — default to "Active"
     status: "Active",
     role: capitalizeRole(apiUser.role),
     userType: capitalizeRole(apiUser.role),
@@ -46,7 +44,6 @@ export default function AllUsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isSuspendConfirmOpen, setIsSuspendConfirmOpen] = useState(false);
@@ -85,7 +82,6 @@ export default function AllUsersPage() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Reset to page 1 whenever filters change
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
@@ -97,16 +93,6 @@ export default function AllUsersPage() {
   };
 
   // ─── Actions ───────────────────────────────────────────────────────────────
-
-  const handleAddUser = (data: AddUserData) => {
-    console.log("Adding user:", data);
-    setIsAddModalOpen(false);
-    setSuccessMessage({
-      title: "User Added Successfully",
-      message: "Login details have been sent to the users mail",
-    });
-    setIsSuccessModalOpen(true);
-  };
 
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
@@ -153,19 +139,19 @@ export default function AllUsersPage() {
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
-      case "Active": return "bg-green-100 text-green-700";
+      case "Active":   return "bg-green-100 text-green-700";
       case "Inactive": return "bg-yellow-100 text-yellow-700";
-      case "Removed": return "bg-red-100 text-red-700";
-      default: return "bg-gray-100 text-gray-700";
+      case "Removed":  return "bg-red-100 text-red-700";
+      default:         return "bg-gray-100 text-gray-700";
     }
   };
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <main className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6">
+    <main className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6 pry-ff">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6">
+        <div className="bg-(--txt-clr) rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6">
 
           {/* ── Toolbar ─────────────────────────────────────────────────── */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
@@ -183,7 +169,6 @@ export default function AllUsersPage() {
                 className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
-
 
             {/* Role filter */}
             <div className="relative min-w-[120px] sm:min-w-[140px]">

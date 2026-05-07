@@ -227,14 +227,15 @@ function Detail({
 // ─── Bool detail row ─────────────────────────────────────────────────────────
 
 function BoolDetail({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   icon,
   label,
   value,
-}: {
+}: Readonly<{
   icon: React.ReactNode;
   label: string;
   value: boolean;
-}) {
+}>) {
   return (
     <div className="flex items-center gap-3 text-[var(--txt-clr)]">
       <span className={`mt-0.5 w-4 h-4 shrink-0 ${value ? "text-green-500" : "text-red-400"}`}>

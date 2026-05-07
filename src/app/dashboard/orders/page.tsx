@@ -6,7 +6,7 @@ import { OrderDetailModal } from "@/components/order-management/order-detail-mod
 import { ConfirmationModal } from "@/components/user-management/confirmation-modal";
 import { SuccessModal } from "@/components/user-management/success-modal";
 import PulseLoader from "@/components/pulse-loader";
-import { getAllOrders, type ApiOrder, type OrderStatus } from "@/lib/api/order";
+import { getAllOrders, type ApiOrder } from "@/lib/api/order";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
