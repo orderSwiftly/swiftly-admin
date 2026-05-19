@@ -53,8 +53,8 @@ export default function RiderLiability() {
 
             {/* Header */}
             <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
-                    <Bike size={15} className="text-rose-500" />
+                <div className="w-8 h-8 rounded-lg bg-[#E6F4F0] flex items-center justify-center">
+                    <Bike size={15} className="text-(--bg-clr)" />
                 </div>
                 <p className="text-sm font-semibold text-gray-500 tracking-wide">
                     Rider Liability

@@ -5,7 +5,7 @@ import {
   Users,
   Building2,
   Truck,
-  Package,
+  // Package,
   LogOut,
 } from "lucide-react";
 import Link from "next/link";
@@ -35,11 +35,11 @@ const navItems = [
     href: "/dashboard/orders",
     icon: Truck,
   },
-  {
-    label: "Product Management",
-    href: "/dashboard/all-products",
-    icon: Package,
-  },
+  // {
+  //   label: "Product Management",
+  //   href: "/dashboard/all-products",
+  //   icon: Package,
+  // },
   // {
   //   label: "Financial & Pricing Controls",
   //   href: "/dashboard/financial",

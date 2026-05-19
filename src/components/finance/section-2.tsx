@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { getTransferTransactions, getPaymentTransactions } from "@/lib/api/financials";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ArrowDown, ChevronDown } from "lucide-react";
 
 interface MoneyFlowData {
   customersPaid: { lifetime: number; period: number };
@@ -90,6 +90,44 @@ function FilterDropdown({
   );
 }
 
+// ─── Money Flow Card ──────────────────────────────────────────────────────────
+
+function MoneyFlowCard({
+  title,
+  lifetime,
+  period,
+  periodLabel,
+  isRider = false,
+}: {
+  title: string;
+  lifetime: number;
+  period: number;
+  periodLabel: string;
+  isRider?: boolean;
+}) {
+  return (
+    <div className="flex-1 space-y-1">
+      <p className="text-sm text-gray-500">{title}</p>
+      <div>
+        <p className="text-2xl font-bold text-gray-900">
+          ₦{lifetime.toLocaleString()}
+        </p>
+        <p className="text-xs text-gray-400">lifetime</p>
+      </div>
+      <div className="mt-2 pt-2 border-t border-gray-100">
+        <p className="text-lg font-semibold text-gray-700">
+          ₦{period.toLocaleString()}
+        </p>
+        <p className="text-xs text-gray-400">
+          {isRider && periodLabel === "today" ? "paid today" : 
+           isRider && periodLabel === "selected period" ? "paid in selected period" :
+           isRider ? `paid ${periodLabel}` : periodLabel}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function Section2() {
   const [moneyFlow, setMoneyFlow] = useState<MoneyFlowData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,6 +135,11 @@ export default function Section2() {
   const [dateRange, setDateRange] = useState<DateRange>("today");
   const [customFrom, setCustomFrom] = useState<string>("");
   const [customTo, setCustomTo] = useState<string>("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const getDateRangeParams = (): { from?: string; to?: string } => {
     const today = new Date();
@@ -149,7 +192,6 @@ export default function Section2() {
         return;
       }
       
-      // Fetch both payment and transfer transactions
       const [paymentsResult, transfersResult] = await Promise.all([
         getPaymentTransactions({
           from,
@@ -163,11 +205,9 @@ export default function Section2() {
         }) as Promise<TransfersResponse>
       ]);
       
-      // Calculate totals from API responses
       const periodPayments = paymentsResult?.data?.payments?.reduce((sum: number, p: PaymentTransaction) => sum + p.amount, 0) || 0;
       const periodTransfers = transfersResult?.data?.transfers?.reduce((sum: number, t: TransferTransaction) => sum + t.amount, 0) || 0;
       
-      // Using dummy data for now - replace with actual API data when available
       const mockData: MoneyFlowData = {
         customersPaid: {
           lifetime: 2601,
@@ -197,8 +237,10 @@ export default function Section2() {
   };
 
   useEffect(() => {
-    fetchMoneyFlow();
-  }, [dateRange, customFrom, customTo]);
+    if (mounted) {
+      fetchMoneyFlow();
+    }
+  }, [dateRange, customFrom, customTo, mounted]);
 
   const dateRangeOptions: { label: string; value: DateRange }[] = [
     { label: "Today", value: "today" },
@@ -206,13 +248,17 @@ export default function Section2() {
     { label: "This Month", value: "thisMonth" },
   ];
 
+  if (!mounted) {
+    return null;
+  }
+
   if (loading) {
     return (
       <section className="w-full flex flex-col gap-6">
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
           <div className="animate-pulse space-y-4">
             <div className="h-6 bg-gray-200 rounded w-48"></div>
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row gap-6 md:gap-4">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="flex-1 space-y-2">
                   <div className="h-4 bg-gray-200 rounded w-24"></div>
@@ -239,10 +285,12 @@ export default function Section2() {
 
   if (!moneyFlow) return null;
 
+  const periodLabel = getPeriodLabel();
+
   return (
     <section className="w-full flex flex-col gap-6">
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h2 className="text-lg font-semibold text-gray-900">Money Flow</h2>
           
           <FilterDropdown
@@ -254,14 +302,14 @@ export default function Section2() {
 
         {/* Custom Date Picker */}
         {dateRange === "custom" && (
-          <div className="mb-6 flex gap-4">
+          <div className="mb-6 flex flex-col sm:flex-row gap-4">
             <div>
               <label className="block text-xs text-gray-500 mb-1">From</label>
               <input
                 type="date"
                 value={customFrom}
                 onChange={(e) => setCustomFrom(e.target.value)}
-                className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-(--acc-clr)"
+                className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
             <div>
@@ -270,91 +318,92 @@ export default function Section2() {
                 type="date"
                 value={customTo}
                 onChange={(e) => setCustomTo(e.target.value)}
-                className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-(--acc-clr)"
+                className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
           </div>
         )}
         
-        <div className="flex items-center justify-between gap-4">
-          {/* Customers Paid */}
-          <div className="flex-1 space-y-1">
-            <p className="text-sm text-gray-500">Customers Paid</p>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">
-                ₦{moneyFlow.customersPaid.lifetime.toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-400">lifetime</p>
-            </div>
-            <div className="mt-2">
-              <p className="text-lg font-semibold text-gray-700">
-                ₦{moneyFlow.customersPaid.period.toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-400">{getPeriodLabel()}</p>
-            </div>
+        {/* Desktop Layout: Horizontal with arrows */}
+        <div className="hidden md:flex items-center justify-between gap-4">
+          <MoneyFlowCard
+            title="Customers Paid"
+            lifetime={moneyFlow.customersPaid.lifetime}
+            period={moneyFlow.customersPaid.period}
+            periodLabel={periodLabel}
+          />
+          
+          <ArrowRight className="w-5 h-5 text-(--prof-clr) flex-shrink-0" />
+          
+          <MoneyFlowCard
+            title="Vendor Allocation"
+            lifetime={moneyFlow.vendorAllocation.lifetime}
+            period={moneyFlow.vendorAllocation.period}
+            periodLabel={periodLabel}
+          />
+          
+          <ArrowRight className="w-5 h-5 text-(--prof-clr) flex-shrink-0" />
+          
+          <MoneyFlowCard
+            title="Rider Allocation"
+            lifetime={moneyFlow.riderAllocation.lifetime}
+            period={moneyFlow.riderAllocation.period}
+            periodLabel={periodLabel}
+            isRider={true}
+          />
+          
+          <ArrowRight className="w-5 h-5 text-(--prof-clr) flex-shrink-0" />
+          
+          <MoneyFlowCard
+            title="Swiftly Gross"
+            lifetime={moneyFlow.swiftlyGross.lifetime}
+            period={moneyFlow.swiftlyGross.period}
+            periodLabel={periodLabel}
+          />
+        </div>
+
+        {/* Mobile Layout: Vertical with down arrows */}
+        <div className="flex flex-col md:hidden gap-4">
+          <MoneyFlowCard
+            title="Customers Paid"
+            lifetime={moneyFlow.customersPaid.lifetime}
+            period={moneyFlow.customersPaid.period}
+            periodLabel={periodLabel}
+          />
+          
+          <div className="flex justify-center">
+            <ArrowDown className="w-5 h-5 text-(--prof-clr)" />
           </div>
-
-          {/* Arrow */}
-          <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-
-          {/* Vendor Allocation */}
-          <div className="flex-1 space-y-1">
-            <p className="text-sm text-gray-500">Vendor Allocation</p>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">
-                ₦{moneyFlow.vendorAllocation.lifetime.toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-400">lifetime</p>
-            </div>
-            <div className="mt-2">
-              <p className="text-lg font-semibold text-gray-700">
-                ₦{moneyFlow.vendorAllocation.period.toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-400">{getPeriodLabel()}</p>
-            </div>
+          
+          <MoneyFlowCard
+            title="Vendor Allocation"
+            lifetime={moneyFlow.vendorAllocation.lifetime}
+            period={moneyFlow.vendorAllocation.period}
+            periodLabel={periodLabel}
+          />
+          
+          <div className="flex justify-center">
+            <ArrowDown className="w-5 h-5 text-(--prof-clr)" />
           </div>
-
-          {/* Arrow */}
-          <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-
-          {/* Rider Allocation */}
-          <div className="flex-1 space-y-1">
-            <p className="text-sm text-gray-500">Rider Allocation</p>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">
-                ₦{moneyFlow.riderAllocation.lifetime.toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-400">lifetime</p>
-            </div>
-            <div className="mt-2">
-              <p className="text-lg font-semibold text-gray-700">
-                ₦{moneyFlow.riderAllocation.period.toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-400">
-                {dateRange === "today" ? "paid today" : getPeriodLabel() === "selected period" ? "paid in selected period" : `paid ${getPeriodLabel()}`}
-              </p>
-            </div>
+          
+          <MoneyFlowCard
+            title="Rider Allocation"
+            lifetime={moneyFlow.riderAllocation.lifetime}
+            period={moneyFlow.riderAllocation.period}
+            periodLabel={periodLabel}
+            isRider={true}
+          />
+          
+          <div className="flex justify-center">
+            <ArrowDown className="w-5 h-5 text-(--prof-clr)" />
           </div>
-
-          {/* Arrow */}
-          <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-
-          {/* Swiftly Gross */}
-          <div className="flex-1 space-y-1">
-            <p className="text-sm text-gray-500">Swiftly Gross</p>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">
-                ₦{moneyFlow.swiftlyGross.lifetime.toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-400">lifetime</p>
-            </div>
-            <div className="mt-2">
-              <p className="text-lg font-semibold text-gray-700">
-                ₦{moneyFlow.swiftlyGross.period.toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-400">{getPeriodLabel()}</p>
-            </div>
-          </div>
+          
+          <MoneyFlowCard
+            title="Swiftly Gross"
+            lifetime={moneyFlow.swiftlyGross.lifetime}
+            period={moneyFlow.swiftlyGross.period}
+            periodLabel={periodLabel}
+          />
         </div>
       </div>
     </section>
