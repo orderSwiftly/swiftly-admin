@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getOrders, getOrderById } from "@/lib/api/financials";
-import { Loader2, ChevronDown, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronDown, ArrowLeft, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -45,6 +45,7 @@ interface Pagination {
 
 type PaymentStatusFilter = "all" | "paid" | "cancelled" | "pending";
 type PayoutStatusFilter  = "all" | "unpaid" | "processing" | "paid";
+type DateRangeFilter = "today" | "thisWeek" | "thisMonth" | "custom";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -68,6 +69,35 @@ function fmtDateTime(iso: string) {
 
 function shortId(id: string) {
     return `#${id.slice(-6).toUpperCase()}`;
+}
+
+function getDateRangeParams(range: DateRangeFilter, customFrom: string, customTo: string): { from?: string; to?: string } {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    switch (range) {
+        case "today":
+            return { from: todayStr, to: todayStr };
+        case "thisWeek": {
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+            return { 
+                from: startOfWeek.toISOString().split('T')[0], 
+                to: todayStr 
+            };
+        }
+        case "thisMonth": {
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            return { 
+                from: startOfMonth.toISOString().split('T')[0], 
+                to: todayStr 
+            };
+        }
+        case "custom":
+            return { from: customFrom, to: customTo };
+        default:
+            return { from: todayStr, to: todayStr };
+    }
 }
 
 // ─── Status badges ────────────────────────────────────────────────────────────
@@ -129,7 +159,50 @@ function FilterDropdown<T extends string>({
                             onClick={() => { onChange(o.value); setOpen(false); }}
                             className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
                                 value === o.value
-                                    ? "bg-violet-50 text-(--prof-clr) font-semibold"
+                                    ? "bg-violet-50 text-violet-600 font-semibold"
+                                    : "text-gray-600 hover:bg-gray-50"
+                            }`}
+                        >
+                            {o.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ─── Date Range Filter Dropdown ──────────────────────────────────────────────
+
+function DateRangeFilterDropdown({
+    value, options, onChange,
+}: {
+    value: DateRangeFilter;
+    options: { label: string; value: DateRangeFilter }[];
+    onChange: (v: DateRangeFilter) => void;
+}) {
+    const [open, setOpen] = useState(false);
+    const current = options.find((o) => o.value === value)?.label ?? "Date range";
+
+    return (
+        <div className="relative">
+            <button
+                onClick={() => setOpen((o) => !o)}
+                className="flex items-center gap-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
+            >
+                <Calendar size={12} />
+                {current}
+                <ChevronDown size={12} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+            </button>
+            {open && (
+                <div className="absolute left-0 top-full mt-1.5 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden">
+                    {options.map((o) => (
+                        <button
+                            key={o.value}
+                            onClick={() => { onChange(o.value); setOpen(false); }}
+                            className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
+                                value === o.value
+                                    ? "bg-violet-50 text-violet-600 font-semibold"
                                     : "text-gray-600 hover:bg-gray-50"
                             }`}
                         >
@@ -207,7 +280,6 @@ function OrderDetail({ id, onBack }: { id: string; onBack: () => void }) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Order info */}
                 <div className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 shadow-sm">
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Order Info</p>
                     {rows.map((r) => (
@@ -219,7 +291,6 @@ function OrderDetail({ id, onBack }: { id: string; onBack: () => void }) {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                    {/* Pricing */}
                     <div className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 shadow-sm">
                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pricing</p>
                         {pricing.map((r) => (
@@ -230,7 +301,6 @@ function OrderDetail({ id, onBack }: { id: string; onBack: () => void }) {
                         ))}
                     </div>
 
-                    {/* Payment */}
                     <div className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-3 shadow-sm">
                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Payment</p>
                         {payment.map((r) => (
@@ -256,20 +326,33 @@ export default function OrdersTable() {
     const [loading, setLoading]       = useState(true);
     const [error, setError]           = useState<string | null>(null);
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [mounted, setMounted]       = useState(false);
 
     const [page, setPage]                       = useState(1);
     const [paymentStatus, setPaymentStatus]     = useState<PaymentStatusFilter>("all");
     const [payoutStatus, setPayoutStatus]       = useState<PayoutStatusFilter>("all");
+    const [dateRange, setDateRange]             = useState<DateRangeFilter>("today");
+    const [customFrom, setCustomFrom]           = useState<string>("");
+    const [customTo, setCustomTo]               = useState<string>("");
+    const [showCustomPicker, setShowCustomPicker] = useState(false);
 
-    const fetchOrders = async (p: number, ps: PaymentStatusFilter, pos: PayoutStatusFilter) => {
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const fetchOrders = async () => {
         setLoading(true);
         setError(null);
         try {
+            const { from, to } = getDateRangeParams(dateRange, customFrom, customTo);
+            
             const res = await getOrders({
-                page: p,
+                page,
                 limit: 20,
-                ...(ps !== "all"  && { paymentStatus: ps }),
-                ...(pos !== "all" && { payoutStatus: pos }),
+                ...(from && { from }),
+                ...(to && { to }),
+                ...(paymentStatus !== "all" && { paymentStatus }),
+                ...(payoutStatus !== "all" && { payoutStatus }),
             });
             setOrders(res.data.orders as Order[]);
             setPagination(res.data.pagination as Pagination);
@@ -281,8 +364,16 @@ export default function OrdersTable() {
     };
 
     useEffect(() => {
-        fetchOrders(page, paymentStatus, payoutStatus);
-    }, [page, paymentStatus, payoutStatus]);
+        if (mounted) {
+            fetchOrders();
+        }
+    }, [page, paymentStatus, payoutStatus, dateRange, customFrom, customTo, mounted]);
+
+    useEffect(() => {
+        setShowCustomPicker(dateRange === "custom");
+    }, [dateRange]);
+
+    if (!mounted) return null;
 
     if (selectedId) {
         return <OrderDetail id={selectedId} onBack={() => setSelectedId(null)} />;
@@ -302,27 +393,65 @@ export default function OrdersTable() {
         { label: "Processing",   value: "processing" },
     ];
 
+    const dateRangeOptions: { label: string; value: DateRangeFilter }[] = [
+        { label: "Today", value: "today" },
+        { label: "This Week", value: "thisWeek" },
+        { label: "This Month", value: "thisMonth" },
+        { label: "Custom Range", value: "custom" },
+    ];
+
     return (
         <div className="flex flex-col gap-4">
 
             {/* Filters */}
-            <div className="flex items-center gap-3 flex-wrap">
-                <FilterDropdown
-                    label="Payment status"
-                    value={paymentStatus}
-                    options={paymentOptions}
-                    onChange={(v) => { setPaymentStatus(v); setPage(1); }}
-                />
-                <FilterDropdown
-                    label="Payout status"
-                    value={payoutStatus}
-                    options={payoutOptions}
-                    onChange={(v) => { setPayoutStatus(v); setPage(1); }}
-                />
-                {pagination && (
-                    <span className="text-xs text-gray-400 ml-auto">
-                        {pagination.total} order{pagination.total !== 1 ? "s" : ""}
-                    </span>
+            <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                    <DateRangeFilterDropdown
+                        value={dateRange}
+                        options={dateRangeOptions}
+                        onChange={setDateRange}
+                    />
+                    <FilterDropdown
+                        label="Payment status"
+                        value={paymentStatus}
+                        options={paymentOptions}
+                        onChange={(v) => { setPaymentStatus(v); setPage(1); }}
+                    />
+                    <FilterDropdown
+                        label="Payout status"
+                        value={payoutStatus}
+                        options={payoutOptions}
+                        onChange={(v) => { setPayoutStatus(v); setPage(1); }}
+                    />
+                    {pagination && (
+                        <span className="text-xs text-gray-400 ml-auto">
+                            {pagination.total} order{pagination.total !== 1 ? "s" : ""}
+                        </span>
+                    )}
+                </div>
+
+                {/* Custom Date Picker */}
+                {showCustomPicker && (
+                    <div className="flex gap-4">
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">From</label>
+                            <input
+                                type="date"
+                                value={customFrom}
+                                onChange={(e) => setCustomFrom(e.target.value)}
+                                className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">To</label>
+                            <input
+                                type="date"
+                                value={customTo}
+                                onChange={(e) => setCustomTo(e.target.value)}
+                                className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            />
+                        </div>
+                    </div>
                 )}
             </div>
 
@@ -364,8 +493,8 @@ export default function OrdersTable() {
                                         <td className="px-5 py-3.5 text-gray-500 whitespace-nowrap">{fmtDate(o.createdAt)}</td>
                                         <td className="px-5 py-3.5 text-gray-800 font-medium">{o.store_name}</td>
                                         <td className="px-5 py-3.5 text-right text-gray-800 font-semibold">{fmt(o.payment?.charged_amount)}</td>
-<td className="px-5 py-3.5 text-right text-gray-500">{fmt(o.pricing?.subtotal)}</td>
-<td className="px-5 py-3.5 text-right text-emerald-600 font-semibold">{fmt(o.payment?.swiftly_earnings)}</td>
+                                        <td className="px-5 py-3.5 text-right text-gray-500">{fmt(o.pricing?.subtotal)}</td>
+                                        <td className="px-5 py-3.5 text-right text-emerald-600 font-semibold">{fmt(o.payment?.swiftly_earnings)}</td>
                                         <td className="px-5 py-3.5 text-center"><PaymentBadge status={o.paymentStatus} /></td>
                                         <td className="px-5 py-3.5 text-center"><PayoutBadge status={o.payout_status} /></td>
                                     </tr>

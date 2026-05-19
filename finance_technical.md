@@ -207,6 +207,7 @@ GET /api/v1/finance/orders?id=6642b1f0e13c4a001f3d9e22
 
 ---
 
+
 ## Endpoint 3 — Rider Payouts
 
 ```
